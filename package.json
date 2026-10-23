@@ -48,7 +48,8 @@
     "dev:mobile": "npm run dev -w @genoffice/mobile",
     "build:mobile": "npm run build -w @genoffice/mobile",
     "build:cloud": "npm run build -w @genoffice/cloud-documents",
-    "start:cloud": "npm run start -w @genoffice/cloud-documents"
+    "start:cloud": "npm run start -w @genoffice/cloud-documents",
+    "start:local": "node packages/cloud-documents/scripts/local.mjs"
   },
   "dependencies": {
     "ws": "^8.21.1"

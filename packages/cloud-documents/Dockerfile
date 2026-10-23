@@ -1,16 +1,26 @@
-# Prototype build template. Use the repository root as the build context.
+# syntax=docker/dockerfile:1
+# Use the repository root as the build context.
 FROM node:22-bookworm-slim AS build
 WORKDIR /source
-COPY package.json package-lock.json tsconfig.base.json ./
+COPY package.json package-lock.json tsconfig.base.json LICENSE NOTICE ./
 COPY apps ./apps
 COPY packages ./packages
-RUN npm ci --ignore-scripts --no-audit --no-fund && npm run build:cloud
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
+    npm ci --ignore-scripts --no-audit --no-fund && npm run build:cloud && npm run build:mobile
+
+FROM caddy:2-alpine AS web
+COPY --from=build /source/apps/mobile/dist /srv/mobile
+COPY packages/cloud-documents/deploy/Caddyfile /etc/caddy/Caddyfile
 
 FROM node:22-bookworm-slim
 WORKDIR /app
 COPY packages/cloud-documents/package.json ./package.json
 COPY LICENSE NOTICE ./
-RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund && mkdir /data && chown node:node /data
+RUN node -e "const fs=require('node:fs');const p=JSON.parse(fs.readFileSync('package.json'));delete p.devDependencies;fs.writeFileSync('package.json',JSON.stringify(p))"
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi; \
+    npm install --omit=dev --ignore-scripts --no-audit --no-fund && mkdir /data && chown node:node /data
 COPY --from=build /source/packages/cloud-documents/dist ./dist
 USER node
 ENV GENOFFICE_CLOUD_DATA_DIR=/data

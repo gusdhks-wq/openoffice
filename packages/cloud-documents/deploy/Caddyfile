@@ -1,0 +1,13 @@
+{$GENOFFICE_CLOUD_DOMAIN} {
+	# Caddy forwards the original Host and Authorization headers.
+	@documents path /v1 /v1/* /mcp /mcp/* /health
+	handle @documents {
+		reverse_proxy documents:5182
+	}
+	handle {
+		root * /srv/mobile
+		file_server
+	}
+	# No access log: keys and document bodies must never be logged.
+	header X-Content-Type-Options nosniff
+}

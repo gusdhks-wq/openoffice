@@ -11,6 +11,11 @@ has been provisioned. Google Drive is a separate optional connection, not the
 storage backend of this service. A document can be connected to both, but they
 have independent versions and conflict handling.
 
+For PC-first setup, including Windows commands and Android USB access, see
+[the Korean local guide](LOCAL.ko.md). `npm run start:local` serves the built mobile
+editor and document service on loopback only, creating private settings if absent.
+For a later always-on server, see [the HTTPS deployment guide](deploy/README.ko.md).
+
 ## Local setup
 
 From the repository root, with Node 22.12+ and npm 10+:
@@ -145,8 +150,9 @@ References checked for support scope:
 
 The server must run on an always-on host for edits to continue while the PC and
 phone are off. Use one persistent volume, one service process and an HTTPS reverse
-proxy. The included Dockerfile is a deployment template; a production image or
-public endpoint has not been deployed or verified.
+proxy. The included Dockerfile and Compose configuration build the document service and
+mobile web UI behind Caddy. Local image builds are verified separately from public
+TLS/domain provisioning; no public endpoint has been deployed.
 
 | Variable                          | Meaning                                                     |
 | --------------------------------- | ----------------------------------------------------------- |

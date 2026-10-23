@@ -1,0 +1,55 @@
+name: ieumoffice-documents
+services:
+  documents:
+    build:
+      context: ../../..
+      dockerfile: packages/cloud-documents/Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      GENOFFICE_CLOUD_HOST: 0.0.0.0
+      GENOFFICE_CLOUD_PORT: '5182'
+      GENOFFICE_CLOUD_DATA_DIR: /data
+      GENOFFICE_CLOUD_PUBLIC_URL: https://${GENOFFICE_CLOUD_DOMAIN:?Set GENOFFICE_CLOUD_DOMAIN}
+      GENOFFICE_CLOUD_ALLOWED_ORIGINS: https://${GENOFFICE_CLOUD_DOMAIN},https://localhost
+      GENOFFICE_CLOUD_OWNER_TOKEN: ${GENOFFICE_CLOUD_OWNER_TOKEN:?Set the owner key}
+      GENOFFICE_CLOUD_AGENT_TOKEN: ${GENOFFICE_CLOUD_AGENT_TOKEN:?Set the agent key}
+    volumes:
+      - documents:/data
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:5182/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+  web:
+    build:
+      context: ../../..
+      dockerfile: packages/cloud-documents/Dockerfile
+      target: web
+    restart: unless-stopped
+    environment:
+      GENOFFICE_CLOUD_DOMAIN: ${GENOFFICE_CLOUD_DOMAIN:?Set GENOFFICE_CLOUD_DOMAIN}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - certificates:/data
+      - caddy_config:/config
+    depends_on:
+      documents:
+        condition: service_healthy
+volumes:
+  documents:
+  certificates:
+  caddy_config:
