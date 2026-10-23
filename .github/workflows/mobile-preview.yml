@@ -31,6 +31,8 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run build:cloud
+      - name: Verify actual browser consent and PKCE
+        run: node packages/cloud-documents/scripts/verify-oauth-browser.mjs
       - run: npm run build:mobile
       - run: npm run test -w @genoffice/mobile
       - name: Download and verify bundled runtime

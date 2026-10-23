@@ -122,6 +122,10 @@ describe('temporary OAuth approval for shared document tools', () => {
       client = await s.client(),
       start = await s.begin(client)
     expect(start.html).toContain('공유 문서 연결')
+    expect(start.response.headers.get('referrer-policy')).toBe('same-origin')
+    expect(start.response.headers.get('content-security-policy')).toContain(
+      `form-action 'self' ${redirectUri};`,
+    )
     expect(start.response.headers.get('set-cookie')).toContain('Secure')
     expect(start.response.headers.get('content-security-policy')).toContain(
       "frame-ancestors 'none'",

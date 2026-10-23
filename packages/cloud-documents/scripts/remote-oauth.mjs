@@ -121,9 +121,11 @@ export function createRemoteOAuth({ origin, onApprovalCode, now = () => Date.now
       })
       res.set({
         'Cache-Control': 'no-store',
-        'Referrer-Policy': 'no-referrer',
-        'Content-Security-Policy':
-          "default-src 'none'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+        // Keep the consent POST Origin; no-referrer makes Chromium send Origin: null.
+        // Same-origin still withholds the consent URL from the external callback.
+        'Referrer-Policy': 'same-origin',
+        // Chromium also applies form-action to the successful approval redirect.
+        'Content-Security-Policy': `default-src 'none'; form-action 'self' ${new URL(params.redirectUri).href}; frame-ancestors 'none'; base-uri 'none'`,
       })
       const lang = approvalLanguage(res.req.headers['accept-language'])
       const [title, details, label, button, warning] = approvalMessages[lang]
