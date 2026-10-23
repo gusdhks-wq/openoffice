@@ -16,6 +16,31 @@ For PC-first setup, including Windows commands and Android USB access, see
 editor and document service on loopback only, creating private settings if absent.
 For a later always-on server, see [the HTTPS deployment guide](deploy/README.ko.md).
 
+## Optional phone and ChatGPT connection
+
+The Windows preview includes `Mobile-connect.cmd`; an add-on artifact can also be
+extracted into an existing portable folder without replacing settings or documents.
+Keep `Start.cmd` running, then start this separate opt-in connector. Cloudflare
+provides a temporary HTTPS address for the existing Android app or phone browser.
+The gateway preserves backend authentication and permits only the app origins and
+public app origin; private files and arbitrary upstream targets are excluded.
+
+For ChatGPT custom MCP setup use that address plus `/mcp`, OAuth and dynamic
+client registration (DCR). Approve with the one-time code shown on the PC, never
+with a ChatGPT password or document owner key. Tokens cover only agent access to
+shared documents/history; PKCE, callback restrictions, CSRF, expiry, rotating
+refresh tokens and revocation apply. OAuth state is memory-only: closing the
+connector invalidates it. Public anonymous calls can discover tools but cannot
+read or change documents. The core local service still accepts separate bearer
+keys. No OpenAI API key, model call or subscription process is involved.
+
+This is a test connection: Cloudflare terminates TLS; the public address changes
+after restart, both PC processes must remain running, and no production hosting
+is provisioned. The JSON MCP transport avoids Quick Tunnel SSE limitations.
+See `portable/MOBILE.ko.txt` for user steps. A synthetic Windows test verified
+real HTTPS, Android-origin requests and DCR/approval/PKCE through the public
+connector; actual user device and ChatGPT plugin calls must still be verified.
+
 ## Local setup
 
 From the repository root, with Node 22.12+ and npm 10+:
@@ -108,10 +133,12 @@ alone does not make a plugin web-compatible. Local `config.toml` is not read by
 ChatGPT web. Workspace policy, reachable HTTPS hosting and supported authentication
 must be verified for the specific cloud product.
 
-This prototype provides a bearer-authenticated MCP endpoint, not a published
-ChatGPT plugin or OAuth authorization server. It has been tested with the real MCP
-SDK client locally, **not an installed tool in this chat or a user's hosted Codex
-session**. Do not describe it as automatically connected to ChatGPT/Codex cloud.
+The core service provides a bearer-authenticated MCP endpoint. The optional
+`Mobile-connect.cmd` gateway adds OAuth for private custom ChatGPT plugin setup;
+it does not publish a plugin or install tools in this chat. MCP SDK calls and
+a synthetic real-HTTPS OAuth exchange are verified, **not a user's actual hosted
+Codex/ChatGPT session**. Do not describe a user connection as complete until an
+actual tool call succeeds.
 
 A cloud coding environment that permits HTTPS requests and provides the agent
 credential at runtime can alternatively use the included HTTP helper:
