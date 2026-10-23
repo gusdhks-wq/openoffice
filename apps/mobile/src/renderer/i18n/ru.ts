@@ -1,0 +1,21 @@
+import type zh from './zh'
+export default {
+  prototype: 'Мобильный прототип',
+  newDocument: 'Новый документ',
+  importFile: 'Импорт',
+  exportFile: 'Экспорт',
+  documents: 'Документы',
+  editor: 'Содержимое документа',
+  saved: 'Сохранено на устройстве',
+  saving: 'Сохранение…',
+  saveFailed: 'Не сохранено. Перед выходом экспортируйте копию.',
+  retry: 'Повторить сохранение',
+  loading: 'Загрузка…',
+  openFailed: 'Не удалось открыть локальное хранилище. Обновите страницу.',
+  importFailed: 'Выберите файл UTF-8 .md или .txt размером менее 2 МБ.',
+  exportFailed: 'Не удалось экспортировать файл.',
+  localOnly: 'Только локальное хранение. Диск и облачный ИИ не подключены.',
+  untitled: 'Без названия',
+  empty: 'Создайте или импортируйте документ.',
+  language: 'Язык',
+} satisfies Record<keyof typeof zh, string>

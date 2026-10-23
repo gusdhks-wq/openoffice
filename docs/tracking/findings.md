@@ -565,3 +565,29 @@
 - **보이는 것.** 다음 이어하기 제안의 시작 전 확인이 예전 페이지 번호를 미리 고른다.
 - **왜 중요한가.** 사람이 확인 창에서 고치지 않으면 다른 페이지를 보낸다(보내기 전에 확인 창이 보인다).
 - **지금 못 푸는 이유.** 기억해 둔 페이지 번호(`job-pages.ts`)는 번호만 담아 페이지 지문으로 옮길 수 없다. 저장 때도 같은 한계가 이미 있었다.
+
+## Mobile prototype verification limits (2026-10-23)
+
+- **Conditions.** This cloud checkout has Java 21 but no Android SDK or attached
+  physical phone. Capacitor project generation and synchronization succeed;
+  native APK compilation, file sharing and keyboard/lifecycle behavior remain
+  unverified. A browser at a mobile viewport does not replace device testing.
+- **Impact.** The first milestone is a local source-editor prototype, not a
+  store-ready mobile release. Drive synchronization and cloud AI are not yet
+  implemented; no account or paid service has been provisioned.
+- **Repository tests.** `npm test` stops in the unchanged `electron-utils`
+  workspace: four suites cannot load Electron and five remote-fetch assertions
+  fail in this environment (6 failed files, 24 passed; 5 failed tests, 305 passed).
+  The same workspace on an unmodified HEAD archive with the installed dependency
+  tree produces the same failing file/test counts. A direct Electron binary
+  installation attempt also fails with `TypeError: fetch failed`.
+- **Verified separately.** Whole-repository typecheck, lint (existing warnings
+  only), mobile production build and 11 mobile unit tests pass. The unchanged
+  desktop Markdown suite also passes all 1,366 tests when its Git subprocesses
+  are allowed; the sandboxed run failed on `spawnSync git EPERM`. Browser checks
+  exercise Korean source editing, reload recovery, offline restart/edit/recovery,
+  original BOM/CRLF export and concurrent-tab conflict rejection. No real AI
+  provider or subscription was invoked by the mobile implementation or checks.
+- **Next step.** Build and exercise a debug APK on a physical Android phone, then
+  proceed with portable rich-editor adapters and Drive synchronization described
+  in `docs/plans/mobile-cloud.md`.

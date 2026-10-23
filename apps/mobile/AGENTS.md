@@ -1,0 +1,25 @@
+# Mobile prototype
+
+Read the repository-root instructions first. This workspace is an offline source
+editor prototype, not the Electron shell or a connected cloud service.
+
+- Renderer code must run without Node, Electron, subscription CLIs or desktop IPC.
+- Keep the imported desktop source-text codec unchanged. Reuse source bytes when
+  unedited; any new file-format behavior needs round-trip tests.
+- Persist locally before reporting a successful save. All writes supply the last
+  persisted revision; do not weaken conflict rejection to make retries pass.
+- Put UI strings in every shard under `src/renderer/i18n`; use shared branding
+  constants and `@genoffice/ui/tokens.css`.
+- `android/`, `ios/` and `dist/` are generated and ignored. Use `android:add` once
+  and `android:sync` after building. Do not check generated vendor artwork in.
+- The production browser service worker caches static build assets only. Native
+  assets ship in the app and do not need a service worker. Keep dynamic document
+  content, OAuth and cloud requests out of that cache.
+- Runtime dependencies need license text in the mobile build. Update the explicit
+  runtime list in `vite.config.ts` whenever adding a shipped dependency.
+- Do not imply Drive or AI is connected before implementing and verifying it.
+  Follow `docs/plans/mobile-cloud.md` for the migration boundaries.
+
+Run `npm run build:mobile`, `npm run test -w @genoffice/mobile` and repository
+checks. Physical-device IME, file sharing and OS termination need separate
+verification; browser viewport emulation is insufficient.

@@ -1,0 +1,21 @@
+import type zh from './zh'
+export default {
+  prototype: 'Mobilní prototyp',
+  newDocument: 'Nový dokument',
+  importFile: 'Importovat',
+  exportFile: 'Exportovat',
+  documents: 'Dokumenty',
+  editor: 'Obsah dokumentu',
+  saved: 'Uloženo v tomto zařízení',
+  saving: 'Ukládání…',
+  saveFailed: 'Neuloženo. Před odchodem exportujte kopii.',
+  retry: 'Zkusit uložit znovu',
+  loading: 'Načítání…',
+  openFailed: 'Místní úložiště nelze otevřít. Obnovte stránku.',
+  importFailed: 'Vyberte soubor UTF-8 .md nebo .txt menší než 2 MB.',
+  exportFailed: 'Soubor nelze exportovat.',
+  localOnly: 'Pouze místní úložiště. Disk a cloudová AI nejsou připojeny.',
+  untitled: 'Bez názvu',
+  empty: 'Začněte vytvořením nebo importem dokumentu.',
+  language: 'Jazyk',
+} satisfies Record<keyof typeof zh, string>

@@ -17,6 +17,9 @@ export default tseslint.config(
       '**/coverage/**',
       'scripts/drivers/**',
       'apps/*/build/**',
+      // Capacitor regenerates these native projects and their bundled web assets.
+      'apps/mobile/android/**',
+      'apps/mobile/ios/**',
       'packages/*/src/vendor/**',
       // the rhwp engine build (tools/build-rhwp-core.mjs): wasm-bindgen glue, kept verbatim
       'vendor/rhwp-core/**',

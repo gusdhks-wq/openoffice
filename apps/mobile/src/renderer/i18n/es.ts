@@ -1,0 +1,21 @@
+import type zh from './zh'
+export default {
+  prototype: 'Prototipo móvil',
+  newDocument: 'Nuevo documento',
+  importFile: 'Importar',
+  exportFile: 'Exportar',
+  documents: 'Documentos',
+  editor: 'Contenido del documento',
+  saved: 'Guardado en este dispositivo',
+  saving: 'Guardando…',
+  saveFailed: 'No se ha guardado. Exporta una copia antes de salir.',
+  retry: 'Reintentar',
+  loading: 'Cargando…',
+  openFailed: 'No se pudo abrir el almacenamiento local. Recarga la página.',
+  importFailed: 'Elige un archivo UTF-8 .md o .txt de menos de 2 MB.',
+  exportFailed: 'No se pudo exportar el archivo.',
+  localOnly: 'Solo almacenamiento local. Drive y la IA en la nube no están conectados.',
+  untitled: 'Sin título',
+  empty: 'Crea o importa un documento para empezar.',
+  language: 'Idioma',
+} satisfies Record<keyof typeof zh, string>

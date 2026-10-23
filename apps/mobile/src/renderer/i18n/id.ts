@@ -1,0 +1,21 @@
+import type zh from './zh'
+export default {
+  prototype: 'Prototipe seluler',
+  newDocument: 'Dokumen baru',
+  importFile: 'Impor',
+  exportFile: 'Ekspor',
+  documents: 'Dokumen',
+  editor: 'Isi dokumen',
+  saved: 'Tersimpan di perangkat ini',
+  saving: 'Menyimpan…',
+  saveFailed: 'Belum tersimpan. Ekspor salinan sebelum keluar.',
+  retry: 'Coba simpan lagi',
+  loading: 'Memuat…',
+  openFailed: 'Penyimpanan lokal tidak dapat dibuka. Muat ulang halaman.',
+  importFailed: 'Pilih berkas UTF-8 .md atau .txt di bawah 2 MB.',
+  exportFailed: 'Berkas tidak dapat diekspor.',
+  localOnly: 'Hanya penyimpanan lokal. Drive dan AI awan belum terhubung.',
+  untitled: 'Tanpa judul',
+  empty: 'Buat atau impor dokumen untuk memulai.',
+  language: 'Bahasa',
+} satisfies Record<keyof typeof zh, string>
