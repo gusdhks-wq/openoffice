@@ -5,6 +5,15 @@ PC의 Codex CLI/IDE 등 외부 도구에 문서 연결 기능을 제공하며 Op
 현재 데스크톱 프로그램의 모든 문서가 자동으로 이 저장소에 연결되는 기능은 아닙니다.
 먼저 `.md`·`.txt` 문서를 가져와 사용합니다.
 
+## 테스트용 윈도우 패키지
+
+GitHub Actions의 **Mobile preview packages** 실행이 성공하면 Artifacts에서
+`IeumOffice-Mobile-PC-Windows-x64-preview`를 내려받을 수 있습니다. 압축을 모두 풀고
+`Start.cmd`를 더블클릭하면 됩니다. Node 설치와 빌드는 필요하지 않습니다.
+연결키 확인은 같은 폴더의 `Connection-settings.cmd`로 할 수 있습니다.
+패키지는 테스트용이며 코드 서명된 정식 설치 프로그램은 아닙니다.
+아래의 소스 실행 절차는 패키지를 사용하는 경우 생략합니다.
+
 ## 준비와 실행
 
 Node.js 22.12 이상과 npm 10 이상이 필요합니다. 저장소의

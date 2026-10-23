@@ -28,6 +28,7 @@ try {
   console.error('Build first: npm run build:cloud && npm run build:mobile')
   process.exit(1)
 }
+const canonicalAssets = await realpath(assets)
 try {
   await access(settings)
 } catch (error) {
@@ -64,8 +65,8 @@ const web = createServer((request, response) => {
       decodeURIComponent(url.pathname) === '/'
         ? 'index.html'
         : decodeURIComponent(url.pathname).slice(1)
-    const filename = await realpath(resolve(assets, relative))
-    if (!filename.startsWith(assets + sep) || !(await stat(filename)).isFile()) {
+    const filename = await realpath(resolve(canonicalAssets, relative))
+    if (!filename.startsWith(canonicalAssets + sep) || !(await stat(filename)).isFile()) {
       response.writeHead(404).end()
       return
     }

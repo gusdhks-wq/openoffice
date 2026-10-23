@@ -181,7 +181,10 @@ inside their authenticated workspace.
 
 - One JSON database atomically records both new revisions and idempotency receipts.
   Files are private, writes fsync before replacement, and a writer lock prevents
-  two processes using the same directory. Single-process deployment only.
+  two processes using the same directory. POSIX hosts also fsync the directory;
+  Windows skips that unsupported operation and cannot promise directory-entry
+  durability across sudden power loss. Windows permissions depend on the user
+  folder ACL. Single-process deployment only.
 - Previous versions are retained; restoration appends a new one. There is no delete
   or history pruning API. Back up the data volume independently.
 - Prototype limits: 2 MiB per text document, 256 documents, 128 versions per

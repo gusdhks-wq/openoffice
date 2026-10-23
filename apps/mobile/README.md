@@ -32,6 +32,14 @@ must finish installing the offline cache before disconnecting.
 
 ## Android
 
+The **Mobile preview packages** GitHub Actions workflow builds a debug APK artifact
+without a store account or production signing secret. The matching Windows artifact
+bundles Node and the local document server; users extract it and run `Start.cmd`.
+These are test packages, not a published release or an installed cloud plugin.
+Each APK build may use a different temporary debug certificate: export local
+documents before any uninstall needed to change certificates. Device verification
+is separate from compilation.
+
 The native project is generated locally and ignored by Git. No Android SDK,
 signing key or store account is needed for the web build. To build a native app,
 install Android Studio and the Android SDK required by Capacitor 8 (the generated
@@ -53,8 +61,9 @@ setup commands also register the native Drive authorization bridge and add
 inside the app WebView.
 
 Android project creation and Capacitor synchronization have been checked in the
-cloud workspace. APK compilation, native file sharing, a real Korean IME and
-physical-device suspend/termination still need device verification. There is no
+cloud workspace. A debug APK compiled successfully on a GitHub Ubuntu runner
+(Java 21, SDK 36). Native file sharing, a real Korean IME and physical-device
+suspend/termination still need device verification. There is no
 iOS project yet.
 
 ## Drive setup

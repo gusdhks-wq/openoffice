@@ -203,14 +203,16 @@ export class CloudDocumentStore {
       }
       await rename(temporary, join(this.directory, 'documents.json'))
       this.database = next
-      // Directory fsync is supported by the Linux deployment target.
-      const directory = await open(this.directory, 'r')
-      try {
-        await directory.sync()
-      } finally {
-        await directory.close()
+      // Windows cannot open directories through this API. File fsync and atomic
+      // replacement still apply; POSIX hosts also flush the directory entry.
+      if (process.platform !== 'win32') {
+        const directory = await open(this.directory, 'r')
+        try {
+          await directory.sync()
+        } finally {
+          await directory.close()
+        }
       }
-      this.database = next
     } catch (error) {
       await unlink(temporary).catch(() => {})
       if (error instanceof DocumentFailure) throw error
