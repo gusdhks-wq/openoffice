@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { layout, layoutEqual } from './layout.mjs'
 /** Private document inputs/outputs never belong in the checkout. */
 import { readFileSync, writeFileSync, mkdirSync, realpathSync, mkdtempSync } from 'node:fs'
 import { resolve, dirname, extname, relative, isAbsolute, join } from 'node:path'
@@ -165,9 +166,12 @@ for (const item of cases) {
     result.checks.inputSignature = signatureOK(source, format)
     let doc = new HwpDocument(source)
     const before = snapshot(doc)
+    const beforeLayout = layout(doc)
     // Unchanged export isolates serializer losses from requested edits.
     const unchangedBytes = serialize(doc, format)
-    const unchanged = snapshot(new HwpDocument(unchangedBytes))
+    const unchangedDoc = new HwpDocument(unchangedBytes)
+    const unchanged = snapshot(unchangedDoc)
+    result.checks.unchangedResolvedLayout = layoutEqual(beforeLayout, layout(unchangedDoc))
     result.checks.unchangedText = unchanged.text === before.text
     result.checks.unchangedTables = equal(unchanged.tables, before.tables)
     result.checks.unchangedPages = unchanged.pages === before.pages
@@ -201,6 +205,7 @@ for (const item of cases) {
       result.checks.otherTableCellsUnchanged = equal(tables(plugin), expectedTables)
     }
     const expected = snapshot(doc)
+    const expectedLayout = layout(doc)
     const bytes = serialize(doc, format)
     result.checks.outputSignature = signatureOK(bytes, format)
     const reopened = new HwpDocument(bytes)
@@ -208,6 +213,7 @@ for (const item of cases) {
     result.checks.reopenedText = after.text === expected.text
     result.checks.reopenedAllTableCellsAndSpans = equal(after.tables, expected.tables)
     result.checks.reopenedPages = after.pages === expected.pages
+    result.checks.reopenedResolvedLayout = layoutEqual(expectedLayout, layout(reopened))
     result.pages = { input: before.pages, edited: expected.pages, reopened: after.pages }
     result.tableCount = after.tables.length
     result.render = issues(reopened)

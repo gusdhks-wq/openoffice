@@ -111,3 +111,18 @@ hwp5txt /private/roundtrip-results/case-a/edited.hwp > /private/independent.txt
 이 폴더의 코드·설명·비식별 결과 요약만 커밋한다. 원본, 실제 문구가 들어간 manifest,
 추출 본문, 그림, SVG, 스크린샷, HWP/HWPX/PDF, Electron profile은 커밋하지 않는다.
 제품 코드나 공통 명령 계약 변경은 별도 협의한다. `REPORT.md`에 확인 결과와 미해결 항목을 기록한다.
+
+## 레이아웃 비교 추가
+
+`unchangedResolvedLayout`과 `reopenedResolvedLayout`은 모든 페이지의 `getPageTextLayout` 및
+`getPageControlLayout` 결과를 비교한다. 텍스트·글꼴 이름·굵게 등의 엔진이 반환하는 표시 속성,
+표/셀/개체의 속성과 좌표를 검사한다. 좌표·크기·글자 advance의 허용 오차는 **0.5 CSS px**이며,
+행/열 번호와 병합 span 등은 정확히 같아야 한다. 직렬화 시 재번호가 가능한 `charShapeId`와
+`paraShapeId`만 제외한다. 저장 전후 비교이며 한컴 출력과의 비교는 아니다.
+
+엔진이 이 API로 반환하지 않는 속성(모든 테두리/문단 스타일 등)은 검사하지 못한다.
+요청 편집으로 발생한 배치 변화와 저장 과정의 변화도 구분한다. 좌표 판정기의 실패 검사는 다음과 같다.
+
+```sh
+node --test tools/hwp-validation/layout.test.mjs
+```
