@@ -1,5 +1,7 @@
+import drive from './drive/ko'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: '모바일 시제품',
   newDocument: '새 문서',
   importFile: '가져오기',

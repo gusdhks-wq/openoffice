@@ -4,6 +4,7 @@ import { importDocument, MAX_IMPORT_BYTES, updateDocument, type LocalDocument } 
 import { downloadDocument } from './files'
 import { openDocumentStore, type DocumentStore } from './store'
 import { translate, type MessageKey } from './i18n'
+import { DrivePanel } from './drive/DrivePanel'
 
 export function App() {
   const [lang, setLang] = useState<Lang>(() => normalizeLang(navigator.language))
@@ -12,6 +13,9 @@ export function App() {
   const [status, setStatus] = useState<MessageKey>('loading')
   const [error, setError] = useState<MessageKey | null>(null)
   const store = useRef<DocumentStore | null>(null)
+  const [database, setDatabase] = useState<DocumentStore | null>(null)
+  const [driveBusy, setDriveBusy] = useState(false)
+  const [composing, setComposing] = useState(false)
   const latest = useRef<LocalDocument | null>(null)
   const persistedRevisions = useRef(new Map<string, number>())
   const writes = useRef<Promise<void>>(Promise.resolve())
@@ -33,6 +37,7 @@ export function App() {
           return
         }
         store.current = db
+        setDatabase(db)
         const docs = await db.list()
         if (!disposed) {
           persistedRevisions.current = new Map(docs.map((doc) => [doc.id, doc.revision]))
@@ -84,7 +89,18 @@ export function App() {
       })
   }
 
-  const canNavigate = status === 'saved'
+  async function reload(preferredId?: string) {
+    if (!store.current) return
+    const docs = await store.current.list()
+    persistedRevisions.current = new Map(docs.map((doc) => [doc.id, doc.revision]))
+    setDocuments(docs)
+    latest.current =
+      docs.find((doc) => doc.id === (preferredId ?? latest.current?.id)) ?? docs[0] ?? null
+    setActive(latest.current)
+    setStatus('saved')
+  }
+
+  const canNavigate = status === 'saved' && !driveBusy
   function createDocument() {
     if (!canNavigate) return
     void navigator.storage?.persist?.().catch(() => {})
@@ -121,7 +137,7 @@ export function App() {
           ))}
         </select>
       </header>
-      <p className="notice">{t('localOnly')}</p>
+
       <nav>
         <button disabled={!canNavigate} onClick={createDocument}>
           {t('newDocument')}
@@ -149,6 +165,14 @@ export function App() {
           }}
         />
       </nav>
+      <DrivePanel
+        store={database}
+        active={active}
+        disabled={status !== 'saved' || composing}
+        t={t}
+        onBusyChange={setDriveBusy}
+        onReload={reload}
+      />
       {error && <p role="alert">{t(error)}</p>}
       <div className="workspace">
         <aside aria-label={t('documents')}>
@@ -175,6 +199,9 @@ export function App() {
                 aria-label={t('editor')}
                 value={active.text}
                 spellCheck={false}
+                disabled={driveBusy}
+                onCompositionStart={() => setComposing(true)}
+                onCompositionEnd={() => setComposing(false)}
                 autoCapitalize="off"
                 onChange={(event) => {
                   const doc = latest.current

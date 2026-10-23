@@ -591,3 +591,29 @@
 - **Next step.** Build and exercise a debug APK on a physical Android phone, then
   proceed with portable rich-editor adapters and Drive synchronization described
   in `docs/plans/mobile-cloud.md`.
+
+## Drive synchronization prototype requires live setup (2026-10-23)
+
+- **Implemented.** Mobile authorization uses browser Google Identity Services or
+  an Android Google Play services authorization bridge. Access tokens stay in
+  memory. Account-bound pending uploads persist before transfer, retries reuse
+  reserved Drive file IDs, and every uploaded change creates a new file. The
+  app never updates or deletes historical Drive files. Concurrent branches are
+  retained, and downloads cannot replace a draft edited during the transfer.
+- **Verified.** Unit tests exercise interrupted transfers, account changes,
+  concurrent edits, source bytes, streamed size limits, token scopes and native
+  project patching. A Chromium mobile-viewport scenario uses mocked Google
+  endpoints to verify connection, explicit first upload, IME composition gating,
+  offline reconnect, interrupted-upload recovery after reload, duplicate-free
+  retries, no stored access token and disconnect. No live Google login was used.
+- **Pending.** The user has no Google Cloud project/OAuth client yet. The setup
+  guide is in `apps/mobile/README.md#drive-setup`. Android Java compilation and
+  system authorization need an Android SDK, configured package/signing SHA-1 and
+  a physical device with Google Play services. Cross-client file visibility in
+  one Google project still needs live verification.
+- **Limits.** This uses app-created UTF-8 text/Markdown files with `drive.file`
+  access, foreground synchronization of the current linked document and separate
+  immutable version files in My Drive. It does not yet provide arbitrary-file
+  selection, automatic merging, history pruning, canonical-file overwrite,
+  native background execution or cloud AI. These limits are visible in the
+  mobile setup guide and do not silently widen Drive permissions.

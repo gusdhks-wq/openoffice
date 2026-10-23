@@ -1,5 +1,7 @@
+import drive from './drive/ru'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'Мобильный прототип',
   newDocument: 'Новый документ',
   importFile: 'Импорт',

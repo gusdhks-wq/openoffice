@@ -10,8 +10,8 @@
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "android:add": "cap add android",
-    "android:sync": "npm run build && cap sync android",
+    "android:add": "cap add android && node --experimental-strip-types scripts/configure-android.ts",
+    "android:sync": "npm run build && cap sync android && node --experimental-strip-types scripts/configure-android.ts",
     "android:open": "cap open android"
   },
   "dependencies": {

@@ -1,0 +1,18 @@
+export default {
+  driveConnect: '连接云盘',
+  driveDisconnect: '断开云盘',
+  driveSync: '同步此文档',
+  driveRefresh: '刷新',
+  driveRemoteFiles: '云盘版本',
+  driveConnected: '云盘已连接',
+  driveDisconnected: '云盘未连接',
+  driveBusy: '正在同步…',
+  driveSynced: '同步完成',
+  driveConflict: '存在多个版本，请从云盘列表分别打开。',
+  driveFailed: '云盘操作失败，本机文档已保留。',
+  driveSetup: '请先配置 Google OAuth，参阅应用设置指南。',
+  driveAccountMismatch: '此文档属于另一个云盘账号，请连接原账号。',
+  drivePending: '已在本机排队等待上传',
+  driveOffline: '当前离线，联网后将重试同步已关联的文档。',
+  driveNotice: '云盘将修改保存为新文件，尚未连接云端 AI。',
+}

@@ -1,5 +1,7 @@
+import drive from './drive/he'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'אב טיפוס לנייד',
   newDocument: 'מסמך חדש',
   importFile: 'ייבוא',

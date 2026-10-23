@@ -52,7 +52,13 @@ conversion works. No source from those projects was copied into this prototype.
    and one DOCX sample on device. Measure input, selection, memory and fidelity;
    choose Capacitor reuse versus native shell plus embedded web editor from
    measurements. Do not refactor document engines merely to share the shell.
-3. **Drive synchronization.** Configure mobile OAuth and server credentials
+3. **Drive synchronization (prototype implemented, live setup pending).**
+   The mobile app now has browser GIS and native Android authorization paths,
+   account-bound durable uploads, idempotent reserved IDs and append-only file
+   snapshots. All conflicts preserve both heads. There is no canonical overwrite,
+   history cleanup, arbitrary-file picker, OS background sync or live OAuth project
+   configured yet. See `apps/mobile/README.md#drive-setup`. Configure mobile OAuth
+   and server credentials
    through the appropriate platform setup. Add document IDs, Drive file IDs,
    base revisions, pending operations and deletion records. Upload only from a
    durable queue; handle interrupted transfers, revoked auth, device clock skew
@@ -81,7 +87,8 @@ Create a Korean note on the phone offline, reopen it after a completed local
 save, reconnect and synchronize. With the PC off, request a cloud edit and close
 the mobile app. Reopen later to retrieve the result, inspect the change, undo it
 and open the same file on desktop. Simultaneous edits must preserve both versions.
-Only the local editing/recovery portion is implemented by milestone 1.
+Local editing/recovery and foreground Drive synchronization are implemented.
+Drive has been verified with simulated responses only. Cloud AI remains unimplemented.
 
 ## Open setup decisions
 
@@ -93,4 +100,5 @@ Only the local editing/recovery portion is implemented by milestone 1.
 - Native IndexedDB durability and OS lifecycle behavior require real-device
   evidence; browser emulation is insufficient.
 - The prototype retains drafts but does not yet offer document deletion, renaming,
-  rich-text editing, PDF viewing, Drive sync or cloud AI.
+  rich-text editing, PDF viewing or cloud AI. Drive sync is an optional prototype
+  that still needs configured-project and physical-device validation.

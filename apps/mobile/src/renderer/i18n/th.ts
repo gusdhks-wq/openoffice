@@ -1,5 +1,7 @@
+import drive from './drive/th'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'แอปมือถือต้นแบบ',
   newDocument: 'เอกสารใหม่',
   importFile: 'นำเข้า',

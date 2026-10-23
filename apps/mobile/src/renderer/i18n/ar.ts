@@ -1,5 +1,7 @@
+import drive from './drive/ar'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'نموذج تطبيق الهاتف',
   newDocument: 'مستند جديد',
   importFile: 'استيراد',

@@ -1,5 +1,7 @@
+import drive from './drive/ja'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'モバイル試作版',
   newDocument: '新規文書',
   importFile: '読み込み',

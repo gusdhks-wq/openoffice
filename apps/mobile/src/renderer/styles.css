@@ -136,3 +136,29 @@ footer {
     max-width: 200px;
   }
 }
+
+.drive-panel {
+  margin-block: 16px;
+  padding-block-end: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.drive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.drive-panel p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.drive-panel ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.drive-panel li button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: start;
+}

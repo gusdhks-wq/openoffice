@@ -1,5 +1,7 @@
+import drive from './drive/cs'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'Mobilní prototyp',
   newDocument: 'Nový dokument',
   importFile: 'Importovat',

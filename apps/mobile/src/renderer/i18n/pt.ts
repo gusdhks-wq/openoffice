@@ -1,5 +1,7 @@
+import drive from './drive/pt'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'Protótipo móvel',
   newDocument: 'Novo documento',
   importFile: 'Importar',

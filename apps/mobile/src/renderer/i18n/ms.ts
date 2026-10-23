@@ -1,5 +1,7 @@
+import drive from './drive/ms'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'Prototaip mudah alih',
   newDocument: 'Dokumen baharu',
   importFile: 'Import',

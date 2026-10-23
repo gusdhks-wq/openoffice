@@ -1,4 +1,6 @@
+import drive from './drive/zh'
 export default {
+  ...drive,
   prototype: '移动版原型',
   newDocument: '新建文档',
   importFile: '导入',

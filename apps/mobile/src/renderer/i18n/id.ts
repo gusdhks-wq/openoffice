@@ -1,5 +1,7 @@
+import drive from './drive/id'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'Prototipe seluler',
   newDocument: 'Dokumen baru',
   importFile: 'Impor',

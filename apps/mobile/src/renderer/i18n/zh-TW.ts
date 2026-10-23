@@ -1,5 +1,7 @@
+import drive from './drive/zh-TW'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: '行動版原型',
   newDocument: '新增文件',
   importFile: '匯入',

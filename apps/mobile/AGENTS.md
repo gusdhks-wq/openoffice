@@ -1,7 +1,7 @@
 # Mobile prototype
 
 Read the repository-root instructions first. This workspace is an offline source
-editor prototype, not the Electron shell or a connected cloud service.
+editor with optional Drive sync, not the Electron shell or a cloud AI service.
 
 - Renderer code must run without Node, Electron, subscription CLIs or desktop IPC.
 - Keep the imported desktop source-text codec unchanged. Reuse source bytes when
@@ -17,7 +17,10 @@ editor prototype, not the Electron shell or a connected cloud service.
   content, OAuth and cloud requests out of that cache.
 - Runtime dependencies need license text in the mobile build. Update the explicit
   runtime list in `vite.config.ts` whenever adding a shipped dependency.
-- Do not imply Drive or AI is connected before implementing and verifying it.
+- Drive access tokens stay in memory. Never store OAuth secrets in IndexedDB,
+  Preferences, localStorage, logs or committed files. Only explicit connection
+  uses the Google SDK. Sync is append-only: do not PATCH/DELETE historical files.
+- Do not imply real Drive authorization or AI is verified without live evidence.
   Follow `docs/plans/mobile-cloud.md` for the migration boundaries.
 
 Run `npm run build:mobile`, `npm run test -w @genoffice/mobile` and repository

@@ -1,5 +1,7 @@
+import drive from './drive/vi'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'Bản thử nghiệm di động',
   newDocument: 'Tài liệu mới',
   importFile: 'Nhập',

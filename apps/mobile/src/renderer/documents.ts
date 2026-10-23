@@ -1,3 +1,4 @@
+import type { DriveBinding, PendingUpload } from './drive/types'
 import { readSourceText, writeSourceText } from '../../../markdown/src/shared/source-text'
 import type { SourceTextFormat } from '../../../markdown/src/shared/source-text'
 
@@ -10,6 +11,8 @@ export interface LocalDocument {
   format: SourceTextFormat
   revision: number
   updatedAt: number
+  drive?: DriveBinding
+  pendingUpload?: PendingUpload
 }
 export const MAX_IMPORT_BYTES = 2 * 1024 * 1024
 

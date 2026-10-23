@@ -1,5 +1,7 @@
+import drive from './drive/hi'
 import type zh from './zh'
 export default {
+  ...drive,
   prototype: 'मोबाइल प्रारूप',
   newDocument: 'नया दस्तावेज़',
   importFile: 'आयात',
