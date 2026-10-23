@@ -195,6 +195,37 @@ try {
     (await list()).map((doc) => doc.id),
     [document.id],
   )
+  const current = (await list())[0]
+  const changed = await fetch(origin + '/mcp', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'content-type': 'application/json',
+      Accept: 'application/json, text/event-stream',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: {
+        name: 'update_document',
+        arguments: {
+          id: current.id,
+          baseRevision: current.revision,
+          operationId: crypto.randomUUID(),
+          content: '# Changed by external tool\n',
+        },
+      },
+    }),
+  })
+  assert.equal(changed.status, 200)
+  const phoneUpdate = await (
+    await fetch(`${origin}/v1/documents/${document.id}`, {
+      headers: { ...headers, Origin: 'https://localhost' },
+    })
+  ).json()
+  assert.equal(phoneUpdate.document.content, '# Changed by external tool\n')
+
   assert.equal(await readFile(join(root, '.env.cloud.local'), 'utf8'), settings)
   console.log(
     'PASS real HTTPS tunnel, Android-origin owner connection, private-file/auth boundaries, DCR + PC approval + PKCE and shared-only MCP access. No OpenAI API or real user data used.',

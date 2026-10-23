@@ -15,7 +15,7 @@ export function makeMobileGateway({
   getOAuth = () => undefined,
   agentToken,
 }) {
-  return createServer((incoming, outgoing) => {
+  const server = createServer((incoming, outgoing) => {
     const origin = incoming.headers.origin
     const allowed = ['https://localhost', 'capacitor://localhost', getPublicOrigin()].filter(
       Boolean,
@@ -88,24 +88,6 @@ export function makeMobileGateway({
           outgoing.writeHead(503).end()
           return
         }
-        const chunks = []
-        let size = 0
-        for await (const chunk of incoming) {
-          size += chunk.length
-          if (size > 12 * 1024 * 1024) {
-            outgoing.writeHead(413).end()
-            return
-          }
-          chunks.push(chunk)
-        }
-        body = Buffer.concat(chunks)
-        let payload
-        try {
-          payload = JSON.parse(body.toString('utf8'))
-        } catch {
-          outgoing.writeHead(400).end()
-          return
-        }
         const value = /^Bearer (.+)$/i.exec(authorization || '')?.[1]
         let authenticated = false
         if (value) {
@@ -119,6 +101,25 @@ export function makeMobileGateway({
             } catch {}
           }
         }
+        const chunks = []
+        let size = 0
+        for await (const chunk of incoming) {
+          size += chunk.length
+          if (size > (authenticated ? 12 * 1024 * 1024 : 32 * 1024)) {
+            outgoing.writeHead(413).end()
+            return
+          }
+          chunks.push(chunk)
+        }
+        body = Buffer.concat(chunks)
+        let payload
+        try {
+          payload = JSON.parse(body.toString('utf8'))
+        } catch {
+          outgoing.writeHead(400).end()
+          return
+        }
+
         if (
           (!authenticated && value) ||
           (!authenticated &&
@@ -225,6 +226,10 @@ export function makeMobileGateway({
       outgoing.end()
     })
   })
+  server.requestTimeout = 30000
+  server.headersTimeout = 10000
+  server.maxHeadersCount = 64
+  return server
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -285,7 +290,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       `http://127.0.0.1:${gatewayPort}`,
       '--http-host-header',
       `127.0.0.1:${gatewayPort}`,
-      '--logformat',
+      '--output',
       'json',
     ],
     { shell: false, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true },

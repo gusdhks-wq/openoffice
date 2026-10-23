@@ -123,6 +123,21 @@ async function mcp(url, token) {
   return client
 }
 describe('mobile HTTPS gateway boundaries', () => {
+  it('bounds anonymous protocol payloads before forwarding them', async () => {
+    const s = await setup()
+    const response = await fetch(s.url + '/mcp', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/list',
+        padding: 'x'.repeat(40 * 1024),
+      }),
+    })
+    expect(response.status).toBe(413)
+  })
+
   it('allows native HTTPS origins, retains backend authentication and refuses private files and unrelated browser origins', async () => {
     const s = await setup()
     const unauth = await fetch(s.url + '/v1/documents', {
