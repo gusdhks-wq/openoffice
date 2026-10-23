@@ -1,7 +1,9 @@
+import hwp from './hwp/vi'
 import cloud from './cloud/vi'
 import drive from './drive/vi'
 import type zh from './zh'
 export default {
+  ...hwp,
   ...cloud,
   ...drive,
   prototype: 'Bản thử nghiệm di động',

@@ -278,3 +278,9 @@ across restarts. Credentials must be entered again after restart. The server
 workspace ID prevents a queued upload moving into a different workspace at the
 same URL. Google Drive synchronization is independent; this service does not read
 or persist Google tokens.
+
+## 한글 문서 작업 공간 · 시험 기능
+
+HWP·HWPX 원본을 가져와 쪽을 보고, 본문·표 안의 유일한 문구를 부분 수정할 수 있습니다. 수정은 원본과 별도 명령 목록으로 기기에 먼저 저장됩니다. 작업 사본 `.ieum-hwp.json`을 내보내고 이 앱에서 다시 가져올 수 있으며, 원본 내보내기는 수정 전 파일 바이트를 그대로 돌려줍니다.
+
+현재 수정본을 HWP·HWPX로 저장하거나 한글 문서에 AI·Drive를 연결하는 기능은 아직 없습니다. 기존 텍스트·Google Docs 동기화와 한글 문서 작업 공간은 별개입니다. 캔버스 직접 입력, 서식 편집과 Android 실기기 검증도 남아 있습니다. 구현 경계와 완료 조건은 [모바일 한글 문서 작업](../../docs/plans/mobile-hwp.md)을 따릅니다.

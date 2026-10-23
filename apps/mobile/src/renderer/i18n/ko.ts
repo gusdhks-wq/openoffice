@@ -1,7 +1,9 @@
+import hwp from './hwp/ko'
 import cloud from './cloud/ko'
 import drive from './drive/ko'
 import type zh from './zh'
 export default {
+  ...hwp,
   ...cloud,
   ...drive,
   prototype: '모바일 시제품',

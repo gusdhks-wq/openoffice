@@ -1,7 +1,9 @@
+import hwp from './hwp/th'
 import cloud from './cloud/th'
 import drive from './drive/th'
 import type zh from './zh'
 export default {
+  ...hwp,
   ...cloud,
   ...drive,
   prototype: 'แอปมือถือต้นแบบ',

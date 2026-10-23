@@ -6,6 +6,11 @@ import { openDocumentStore, type DocumentStore } from './store'
 import { translate, type MessageKey } from './i18n'
 import { DrivePanel } from './drive/DrivePanel'
 import { CloudPanel } from './cloud/CloudPanel'
+import { lazy, Suspense } from 'react'
+
+const HwpPanel = lazy(() =>
+  import('./hwp/HwpPanel').then((module) => ({ default: module.HwpPanel })),
+)
 
 export function App() {
   const [lang, setLang] = useState<Lang>(() => normalizeLang(navigator.language))
@@ -167,6 +172,9 @@ export function App() {
           }}
         />
       </nav>
+      <Suspense fallback={<p>{t('loading')}</p>}>
+        <HwpPanel t={t} />
+      </Suspense>
       <DrivePanel
         store={database}
         active={active}

@@ -20,6 +20,7 @@ function offlineShell(): Plugin {
         '@capacitor/filesystem',
         '@capacitor/share',
         'tslib',
+        '@rhwp/core',
       ]
       const notices = runtime
         .map((name) => {
@@ -48,6 +49,14 @@ function offlineShell(): Plugin {
         })
       }
       this.emitFile({ type: 'asset', fileName: 'THIRD-PARTY-NOTICES.txt', source: notices })
+      this.emitFile({
+        type: 'asset',
+        fileName: 'THIRD-PARTY-LICENSES-rhwp.md',
+        source: readFileSync(
+          resolve(import.meta.dirname, '../../vendor/rhwp-core/THIRD_PARTY_LICENSES.md'),
+          'utf8',
+        ),
+      })
       const files = Object.keys(bundle)
       const fingerprint = Object.values(bundle).map((item) =>
         item.type === 'chunk' ? item.code : String(item.source),

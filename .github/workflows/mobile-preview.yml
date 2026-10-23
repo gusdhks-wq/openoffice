@@ -34,6 +34,8 @@ jobs:
       - name: Verify actual browser consent and PKCE
         run: node packages/cloud-documents/scripts/verify-oauth-browser.mjs
       - run: npm run build:mobile
+      - name: Verify offline HWP and HWPX browser workspaces
+        run: node apps/mobile/scripts/verify-hwp-browser.mjs
       - name: Verify Google document browser UI with synthetic Google endpoints
         run: node apps/mobile/scripts/verify-drive-browser.mjs
       - run: npm run test -w @genoffice/mobile

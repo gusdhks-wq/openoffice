@@ -1,7 +1,9 @@
+import hwp from './hwp/hi'
 import cloud from './cloud/hi'
 import drive from './drive/hi'
 import type zh from './zh'
 export default {
+  ...hwp,
   ...cloud,
   ...drive,
   prototype: 'मोबाइल प्रारूप',

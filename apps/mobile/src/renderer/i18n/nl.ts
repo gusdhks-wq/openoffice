@@ -1,7 +1,9 @@
+import hwp from './hwp/nl'
 import cloud from './cloud/nl'
 import drive from './drive/nl'
 import type zh from './zh'
 export default {
+  ...hwp,
   ...cloud,
   ...drive,
   prototype: 'Mobiel prototype',

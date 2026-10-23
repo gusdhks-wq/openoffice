@@ -1,7 +1,9 @@
+import hwp from './hwp/id'
 import cloud from './cloud/id'
 import drive from './drive/id'
 import type zh from './zh'
 export default {
+  ...hwp,
   ...cloud,
   ...drive,
   prototype: 'Prototipe seluler',

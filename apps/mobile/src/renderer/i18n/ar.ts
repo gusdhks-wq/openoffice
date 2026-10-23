@@ -1,7 +1,9 @@
+import hwp from './hwp/ar'
 import cloud from './cloud/ar'
 import drive from './drive/ar'
 import type zh from './zh'
 export default {
+  ...hwp,
   ...cloud,
   ...drive,
   prototype: 'نموذج تطبيق الهاتف',
