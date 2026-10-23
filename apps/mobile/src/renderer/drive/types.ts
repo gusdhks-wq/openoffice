@@ -32,7 +32,15 @@ export interface DriveSnapshot {
 }
 
 export type DriveFailureKind =
-  'auth' | 'network' | 'limit' | 'invalid' | 'account' | 'missing' | 'conflict'
+  | 'auth'
+  | 'network'
+  | 'limit'
+  | 'invalid'
+  | 'account'
+  | 'missing'
+  | 'conflict'
+  | 'structure'
+  | 'uncertain'
 export class DriveFailure extends Error {
   constructor(public readonly kind: DriveFailureKind) {
     super(`drive-${kind}`)

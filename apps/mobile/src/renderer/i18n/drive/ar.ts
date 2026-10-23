@@ -1,5 +1,18 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: 'إلغاء الإنشاء المعلق (الاحتفاظ بملفات Drive)',
+  driveLiveMode: 'مستندات Google قابلة للتحرير',
+  driveBackupMode: 'نسخ الملفات الاحتياطية السابقة',
+  driveLiveNotice:
+    'زامن مستندات Google النصية دون كمبيوتر. استخدم Google Drive في ChatGPT لتحرير المستند نفسه. لا تُحرر هنا الجداول أو المستندات المنسقة أو متعددة علامات التبويب.',
+  driveGoogleLink: 'فتح مستند Google',
+  driveLiveConflict: 'تغيرت النسختان. تم حفظ المسودة. افتح نسخة Drive بشكل منفصل.',
+  driveUnsupported: 'محتوى أو تنسيق غير مدعوم. تم حفظ الأصل والمسودة المحلية.',
+  driveUncertain: 'نتيجة Google غير مؤكدة. أعد المزامنة للعثور على الملف نفسه ولا تنشئ نسخة أخرى.',
+  driveSetupHint:
+    'فعّل Drive API وDocs API في Google Cloud. سجّل حزمة Android وشهادة التوقيع أو عميل OAuth للويب لهذا المصدر. لا حاجة لسر العميل.',
+  driveWebClientId: 'معرّف عميل OAuth للويب (عام)',
+  driveSaveSetup: 'حفظ إعداد الدخول',
   driveConnect: 'ربط Drive',
   driveDisconnect: 'فصل Drive',
   driveSync: 'مزامنة هذا المستند',

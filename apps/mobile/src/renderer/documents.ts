@@ -1,5 +1,6 @@
 import type { CloudBinding, PendingCloudUpload } from './cloud/sync'
 import type { DriveBinding, PendingUpload } from './drive/types'
+import type { GoogleDocBinding, PendingGoogleDoc } from './drive/google-docs'
 import { readSourceText, writeSourceText } from '../../../markdown/src/shared/source-text'
 import type { SourceTextFormat } from '../../../markdown/src/shared/source-text'
 
@@ -14,6 +15,8 @@ export interface LocalDocument {
   updatedAt: number
   drive?: DriveBinding
   pendingUpload?: PendingUpload
+  googleDoc?: GoogleDocBinding
+  pendingGoogleDoc?: PendingGoogleDoc
   cloud?: CloudBinding
   pendingCloudUpload?: PendingCloudUpload
 }

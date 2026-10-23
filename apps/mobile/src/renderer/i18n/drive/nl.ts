@@ -1,5 +1,21 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: 'Wachtende aanmaak annuleren (Drive-bestanden behouden)',
+  driveLiveMode: 'Bewerkbare Google-documenten',
+  driveBackupMode: 'Oude bestandsback-ups',
+  driveLiveNotice:
+    'Synchroniseer Google-documenten als platte tekst zonder PC. Bewerk hetzelfde document via Google Drive in ChatGPT. Tabellen, opgemaakte documenten en meerdere tabbladen worden hier niet bewerkt.',
+  driveGoogleLink: 'Google-document openen',
+  driveLiveConflict:
+    'Beide kopieën zijn gewijzigd. Het concept blijft bewaard. Open de Drive-kopie apart.',
+  driveUnsupported:
+    'Niet-ondersteunde inhoud of opmaak. Origineel en lokaal concept blijven bewaard.',
+  driveUncertain:
+    'Google-resultaat onzeker. Probeer opnieuw te synchroniseren om hetzelfde bestand te vinden; maak geen extra kopie.',
+  driveSetupHint:
+    'Schakel Drive API en Docs API in Google Cloud in. Registreer het Android-pakket en ondertekeningscertificaat of een web-OAuth-client voor deze exacte oorsprong. Geen clientgeheim nodig.',
+  driveWebClientId: 'Web-OAuth-client-ID (openbaar)',
+  driveSaveSetup: 'Aanmelding opslaan',
   driveConnect: 'Drive verbinden',
   driveDisconnect: 'Drive loskoppelen',
   driveSync: 'Dit document synchroniseren',

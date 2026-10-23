@@ -3,8 +3,8 @@
 This is the first mobile milestone for the IeumOffice fork. It is a separate
 Capacitor/React application, not the Electron shell in a WebView. It currently
 edits Markdown and plain text **as source**, not as the desktop rich-text editor.
-It makes no AI requests. Optional Google Drive authorization and append-only
-synchronization are implemented, but require your Google Cloud configuration.
+It makes no AI requests. Optional Google Drive authorization supports native Google source documents
+and a separate legacy append-only snapshot mode; both require your Google Cloud configuration.
 An optional external-agent document service is provided separately in
 `packages/cloud-documents`; it requires its own running server and connection keys.
 
@@ -76,13 +76,13 @@ Do not send a client secret, access token, refresh token or password to an agent
 ### Google Cloud project
 
 1. Create/select a project in [Google Cloud Console](https://console.cloud.google.com/).
-2. Enable the **Google Drive API** in APIs & Services.
+2. Enable the **Google Drive API** and **Google Docs API** in APIs & Services.
 3. Configure the Google Auth Platform branding, audience and contact information.
    While the app is in testing, add your own account as a test user where required.
 4. Under data access, request only
    `https://www.googleapis.com/auth/drive.file`. This grants access to files the
    app creates or that the user explicitly opens with the app, rather than the
-   whole Drive. This prototype only lists its own versioned files. It does not
+   whole Drive. The app lists only its own source documents and legacy versioned files. It does not
    yet include Google's file picker for arbitrary pre-existing documents.
 
 ### Browser OAuth client
@@ -92,7 +92,9 @@ JavaScript origin used for the app, e.g. `http://localhost:5181` for development
 A hosted build needs its actual HTTPS origin. The GIS popup token flow used here
 has no application redirect endpoint and requires no client secret in the app.
 
-Set the **public client ID** before starting or building:
+For the portable web preview, enter the **public client ID** in the Drive login
+setup UI and save it. Do not enter a client secret. For development, you can also
+set the public client ID before starting or building:
 
 ```sh
 VITE_GOOGLE_DRIVE_CLIENT_ID=YOUR_PUBLIC_CLIENT_ID.apps.googleusercontent.com npm run dev:mobile
@@ -129,7 +131,58 @@ services is required. The native bridge compiles in the debug APK. Real authoriz
 remains unverified until a device and configured project are available. Review Google
 SDK terms and native third-party notices before distributing an APK.
 
-### What synchronization does
+### Editable Google documents (PC-independent mode)
+
+The default Drive mode now creates a plain-text native Google document and keeps
+its file ID stable across edits. Enable **both Google Drive API and Google Docs
+API** in the same project. The existing `drive.file` scope is accepted by the
+official Docs API for documents the app created; no whole-Drive permission is
+added. Android talks directly to Google and does not require a PC or TTT server.
+ChatGPT uses its separately connected Google Drive plugin to edit the same native
+document; the app does not execute ChatGPT or obtain its credentials. Use the
+app's **Open Google document** link to identify the exact file in chat.
+
+- Click **Sync this document** for the first native upload. Subsequent writes use
+  `documents.batchUpdate` with a fresh `requiredRevisionId` and explicit tab ranges.
+  There is no automatic conflict merge. Local and remote changes retain both
+  copies; open the remote document separately to compare.
+- This mode supports only single-tab source documents with ordinary text
+  paragraphs. Tables, inline objects, styled runs, headings and suggested edits
+  are refused rather than flattened. Markdown remains literal source text.
+  The original source codec, BOM/newline preferences and export remain unchanged.
+- The active linked document polls while the app is foregrounded, about every
+  15 seconds; completed local edits queue after 1.5 seconds. Offline edits stay
+  local. There is no Android background worker or app-hosted model runner.
+- Captured writes are durable and account-bound. An interrupted create searches
+  for the same operation marker instead of blindly creating another document.
+  If the result remains unknown, explicitly cancel the pending creation only
+  after checking the Drive list; cancellation keeps all local and remote files.
+  A lost update response is reconciled by reading the same document.
+- Google provides the native document's version history. There is no app-native
+  restoration UI or promise of immutable per-edit Drive snapshots in this mode.
+  Legacy snapshot files are never patched or deleted.
+- Access tokens remain memory-only. Reconnect after app restart or session expiry.
+  Browser setup can now accept the **public** web client ID in the UI without
+  rebuilding; only that public ID is stored locally. Native Android still uses
+  its package/certificate OAuth registration, not a client secret.
+
+The Android artifact contains `GOOGLE-OAUTH-SETUP.ko.txt` with this exact APK's
+public signing SHA-1 and package name. Follow its Google Cloud steps before
+login. Debug signing can change on a later build; never uninstall an older app
+with unexported local drafts just to install this test APK. A web build requires
+a registered stable origin for PC-independent hosting; a temporary PC tunnel
+does not keep the web application hosted after the PC turns off.
+
+This route has unit/stateful API simulations and a real Chromium UI test with
+all Google requests intercepted. **Actual Google account authorization and the
+Android/ChatGPT/Drive round trip remain pending**, separately from the earlier
+verified PC/TTT exchange.
+
+### Legacy file snapshot synchronization
+
+Select the legacy file backup mode before following the snapshot steps below.
+
+### What snapshot synchronization does
 
 - Click **Connect Drive**, then **Sync this document** for the first upload.
 - Each synchronized revision becomes a **new** `.md` or `.txt` file in My Drive.
@@ -152,7 +205,8 @@ SDK terms and native third-party notices before distributing an APK.
   is stored. Disconnect revokes the current grant before clearing the connection.
 - Remote deletion does not delete local documents. There is no automatic merge,
   canonical-file overwrite, dedicated folder, history cleanup, background OS sync,
-  arbitrary Drive file picker or Google Docs/Sheets/Slides format support yet.
+  arbitrary Drive file picker or Sheets/Slides format support. The separate native
+  Google source-document mode is described above.
 - This append-only strategy deliberately does not assume Drive v3 supports an
   atomic `If-Match` write. It trades extra version files for retaining both sides
   of a concurrent edit. Google project/client interoperability still needs live

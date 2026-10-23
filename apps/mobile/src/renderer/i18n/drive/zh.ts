@@ -1,4 +1,17 @@
 export default {
+  driveCancelPending: '取消待创建任务（保留云端文件）',
+  driveLiveMode: '可编辑的 Google 文档',
+  driveBackupMode: '旧版文件备份',
+  driveLiveNotice:
+    '无需电脑即可同步纯文本 Google 文档。在 ChatGPT 中通过 Google Drive 修改同一文档。此处不编辑表格、带格式或多标签页文档。',
+  driveGoogleLink: '打开 Google 文档',
+  driveLiveConflict: '两端均有修改。草稿已保留，请单独打开云端版本。',
+  driveUnsupported: '内容或格式不受支持。原文档和本机草稿均已保留。',
+  driveUncertain: 'Google 的处理结果不确定。请重试同步以查找同一文件，不要另建副本。',
+  driveSetupHint:
+    '在 Google Cloud 中启用 Drive API 和 Docs API。注册 Android 包名和签名证书，或当前来源的网址 OAuth 客户端。无需客户端密钥。',
+  driveWebClientId: '网页 OAuth 客户端 ID（公开）',
+  driveSaveSetup: '保存登录设置',
   driveConnect: '连接云盘',
   driveDisconnect: '断开云盘',
   driveSync: '同步此文档',

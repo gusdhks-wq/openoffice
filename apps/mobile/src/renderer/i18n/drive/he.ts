@@ -1,5 +1,19 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: 'ביטול יצירה ממתינה (שמירת קובצי Drive)',
+  driveLiveMode: 'מסמכי Google הניתנים לעריכה',
+  driveBackupMode: 'גיבויי קבצים קודמים',
+  driveLiveNotice:
+    'סנכרון מסמכי Google בטקסט פשוט ללא מחשב. ב-ChatGPT יש להשתמש ב-Google Drive לעריכת אותו מסמך. טבלאות, מסמכים מעוצבים ומסמכים מרובי כרטיסיות אינם נערכים כאן.',
+  driveGoogleLink: 'פתיחת מסמך Google',
+  driveLiveConflict: 'שני העותקים השתנו. הטיוטה נשמרת. יש לפתוח בנפרד את עותק Drive.',
+  driveUnsupported: 'תוכן או עיצוב לא נתמכים. המקור והטיוטה המקומית נשמרים.',
+  driveUncertain:
+    'תוצאת Google אינה ודאית. יש לנסות לסנכרן שוב כדי למצוא את אותו קובץ, בלי ליצור עותק נוסף.',
+  driveSetupHint:
+    'יש להפעיל Drive API ו-Docs API ב-Google Cloud ולרשום חבילת Android ותעודת חתימה או לקוח OAuth לאתר ממקור זה. אין צורך בסוד לקוח.',
+  driveWebClientId: 'מזהה לקוח OAuth לאתר (ציבורי)',
+  driveSaveSetup: 'שמירת הגדרות כניסה',
   driveConnect: 'חיבור Drive',
   driveDisconnect: 'ניתוק Drive',
   driveSync: 'סנכרון המסמך הזה',

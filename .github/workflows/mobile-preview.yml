@@ -34,6 +34,8 @@ jobs:
       - name: Verify actual browser consent and PKCE
         run: node packages/cloud-documents/scripts/verify-oauth-browser.mjs
       - run: npm run build:mobile
+      - name: Verify Google document browser UI with synthetic Google endpoints
+        run: node apps/mobile/scripts/verify-drive-browser.mjs
       - run: npm run test -w @genoffice/mobile
       - name: Download and verify bundled runtime
         run: python packages/cloud-documents/scripts/download-windows-runtime.py "${{ runner.temp }}/ieum-node"
@@ -59,6 +61,7 @@ jobs:
           Copy-Item "${{ runner.temp }}/ieum-cloudflared/*" "$target/runtime/"
           Copy-Item packages/cloud-documents/portable/Mobile-connect.cmd "$target/"
           Copy-Item packages/cloud-documents/portable/MOBILE.ko.txt "$target/"
+          Copy-Item packages/cloud-documents/portable/GOOGLE-DRIVE.ko.txt "$target/"
           foreach ($name in @('mobile-connect.mjs','remote-oauth.mjs','remote-strings.mjs','mobile-pairing.mjs')) {
             Copy-Item "packages/cloud-documents/scripts/$name" "$target/packages/cloud-documents/scripts/"
           }
@@ -101,6 +104,9 @@ jobs:
           cp apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk /tmp/ieum-apk/IeumOffice-Mobile-Android-preview.apk
           cp LICENSE NOTICE /tmp/ieum-apk/
           cp packages/cloud-documents/portable/ANDROID.ko.txt /tmp/ieum-apk/
+          cp packages/cloud-documents/portable/GOOGLE-DRIVE.ko.txt /tmp/ieum-apk/GOOGLE-OAUTH-SETUP.ko.txt
+          printf '\n이 APK의 Android OAuth 설정값\n패키지: com.ieumoffice.mobile.prototype\n' >> /tmp/ieum-apk/GOOGLE-OAUTH-SETUP.ko.txt
+          keytool -J-Duser.language=en -list -v -keystore "$HOME/.android/debug.keystore" -alias androiddebugkey -storepass android -keypass android | rg 'SHA1:' >> /tmp/ieum-apk/GOOGLE-OAUTH-SETUP.ko.txt
           sha256sum /tmp/ieum-apk/*.apk > /tmp/ieum-apk/SHA256SUMS.txt
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

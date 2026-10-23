@@ -4,7 +4,15 @@ import type { LocalDocument } from '../documents'
 import { exportDocument } from '../documents'
 import type { DocumentStore } from '../store'
 import type { MessageKey } from '../i18n'
-import { authorizeDrive, revokeDrive, type DriveSession } from './auth'
+import {
+  authorizeDrive,
+  revokeDrive,
+  googleWebClientId,
+  saveGoogleWebClientId,
+  type DriveSession,
+} from './auth'
+import { createGoogleDocsRemote } from './google-docs'
+import { GoogleDocsPanel } from './GoogleDocsPanel'
 import { createDriveRemote } from './remote'
 import { openDriveSnapshot, synchronizeDocument } from './sync'
 import { DriveFailure, snapshotHeads, type DriveSnapshot } from './types'
@@ -19,6 +27,8 @@ interface Props {
 }
 
 export function DrivePanel({ store, active, disabled, t, onBusyChange, onReload }: Props) {
+  const [live, setLive] = useState(true)
+  const [clientId, setClientId] = useState(googleWebClientId)
   const [session, setSession] = useState<DriveSession | null>(null)
   const sessionRef = useRef<DriveSession | null>(null)
   const [files, setFiles] = useState<DriveSnapshot[]>([])
@@ -35,6 +45,17 @@ export function DrivePanel({ store, active, disabled, t, onBusyChange, onReload 
         return current && current.expiresAt > Date.now() ? current.accessToken : null
       }),
     [],
+  )
+  const docsRemote = useMemo(
+    () =>
+      createGoogleDocsRemote(
+        () => {
+          const current = sessionRef.current
+          return current && current.expiresAt > Date.now() ? current.accessToken : null
+        },
+        () => remote.account(),
+      ),
+    [remote],
   )
 
   useEffect(() => {
@@ -111,22 +132,68 @@ export function DrivePanel({ store, active, disabled, t, onBusyChange, onReload 
     !!active &&
     (!!active.pendingUpload || (!!active.drive && exportDocument(active) !== active.drive.raw))
   useEffect(() => {
-    if (!needsSync || !session || disabled || busy || autoPaused.current) return
+    if (live || !needsSync || !session || disabled || busy || autoPaused.current) return
     setMessage('drivePending')
     if (!online) return
     const timeout = setTimeout(() => syncRef.current(), 1500)
     return () => clearTimeout(timeout)
-  }, [active?.revision, needsSync, session, online, disabled, busy])
+  }, [active?.revision, needsSync, session, online, disabled, busy, live])
 
   return (
     <section className="drive-panel" aria-label={t('driveRemoteFiles')}>
-      <p className="notice">{session ? t('driveNotice') : t('localOnly')}</p>
+      <p className="notice">
+        {session ? t(live ? 'driveLiveNotice' : 'driveNotice') : t('localOnly')}
+      </p>
+      <label>
+        <select
+          aria-label={t('driveRemoteFiles')}
+          disabled={busy}
+          value={live ? 'docs' : 'backup'}
+          onChange={(event) => {
+            setLive(event.target.value === 'docs')
+            setFiles([])
+          }}
+        >
+          <option value="docs">{t('driveLiveMode')}</option>
+          <option value="backup">{t('driveBackupMode')}</option>
+        </select>
+      </label>
+      {!session && (
+        <details>
+          <summary>{t('driveSetup')}</summary>
+          <p>{t('driveSetupHint')}</p>
+          {!Capacitor.isNativePlatform() && (
+            <form
+              onSubmit={(event) => {
+                event.preventDefault()
+                try {
+                  saveGoogleWebClientId(clientId)
+                  setMessage('driveDisconnected')
+                } catch {
+                  setMessage('driveSetup')
+                }
+              }}
+            >
+              <label>
+                {t('driveWebClientId')}
+                <input
+                  value={clientId}
+                  onChange={(event) => setClientId(event.target.value)}
+                  required
+                  autoComplete="off"
+                />
+              </label>
+              <button>{t('driveSaveSetup')}</button>
+            </form>
+          )}
+        </details>
+      )}
       <div className="drive-actions">
         {!session ? (
           <button
             disabled={disabled || busy || !online}
             onClick={() => {
-              if (!Capacitor.isNativePlatform() && !import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID) {
+              if (!Capacitor.isNativePlatform() && !googleWebClientId()) {
                 setMessage('driveSetup')
                 return
               }
@@ -135,7 +202,7 @@ export function DrivePanel({ store, active, disabled, t, onBusyChange, onReload 
                 sessionRef.current = next
                 await remote.account()
                 setSession(next)
-                setFiles(snapshotHeads(await remote.list()))
+                if (!live) setFiles(snapshotHeads(await remote.list()))
                 return { message: 'driveConnected' }
               })
             }}
@@ -144,20 +211,24 @@ export function DrivePanel({ store, active, disabled, t, onBusyChange, onReload 
           </button>
         ) : (
           <>
-            <button disabled={disabled || busy || !online || !active} onClick={sync}>
-              {t('driveSync')}
-            </button>
-            <button
-              disabled={disabled || busy || !online}
-              onClick={() =>
-                void run(async () => {
-                  setFiles(snapshotHeads(await remote.list()))
-                  return { message: 'driveConnected' }
-                })
-              }
-            >
-              {t('driveRefresh')}
-            </button>
+            {!live && (
+              <button disabled={disabled || busy || !online || !active} onClick={sync}>
+                {t('driveSync')}
+              </button>
+            )}
+            {!live && (
+              <button
+                disabled={disabled || busy || !online}
+                onClick={() =>
+                  void run(async () => {
+                    setFiles(snapshotHeads(await remote.list()))
+                    return { message: 'driveConnected' }
+                  })
+                }
+              >
+                {t('driveRefresh')}
+              </button>
+            )}
             <button
               disabled={disabled || busy || !online}
               onClick={() =>
@@ -175,11 +246,25 @@ export function DrivePanel({ store, active, disabled, t, onBusyChange, onReload 
           </>
         )}
       </div>
+      {session && live && (
+        <GoogleDocsPanel
+          store={store}
+          active={active}
+          disabled={disabled || busy}
+          remote={docsRemote}
+          t={t}
+          onBusyChange={(value) => {
+            setBusy(value)
+            onBusyChange(value)
+          }}
+          onReload={onReload}
+        />
+      )}
       <p role="status" aria-live="polite">
         {!online ? t('driveOffline') : t(message)}
       </p>
       {active?.pendingUpload && <p>{t('drivePending')}</p>}
-      {files.length > 0 && (
+      {!live && files.length > 0 && (
         <details>
           <summary>{t('driveRemoteFiles')}</summary>
           <ul>

@@ -189,7 +189,9 @@ footer {
   font-size: 14px;
 }
 .cloud-panel input,
-.cloud-panel select {
+.cloud-panel select,
+.drive-panel input,
+.drive-panel select {
   width: 100%;
   max-width: 100%;
   min-height: 44px;
@@ -199,6 +201,12 @@ footer {
   background: var(--surface);
   color: var(--text);
   font: inherit;
+}
+.google-docs-panel a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px;
 }
 .cloud-actions {
   display: flex;

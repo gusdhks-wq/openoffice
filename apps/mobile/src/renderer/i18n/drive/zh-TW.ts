@@ -1,5 +1,18 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: '取消待建立工作（保留雲端檔案）',
+  driveLiveMode: '可編輯的 Google 文件',
+  driveBackupMode: '舊版檔案備份',
+  driveLiveNotice:
+    '無需電腦即可同步純文字 Google 文件。在 ChatGPT 中透過 Google Drive 修改同一文件。此處不編輯表格、有格式或多分頁文件。',
+  driveGoogleLink: '開啟 Google 文件',
+  driveLiveConflict: '兩端皆有修改。草稿已保留，請另行開啟雲端版本。',
+  driveUnsupported: '內容或格式不受支援。原文件及本機草稿皆已保留。',
+  driveUncertain: 'Google 的處理結果不確定。請重試同步以尋找同一檔案，勿另建副本。',
+  driveSetupHint:
+    '在 Google Cloud 啟用 Drive API 和 Docs API。註冊 Android 套件及簽署憑證，或目前來源的網頁 OAuth 用戶端。不需要用戶端密鑰。',
+  driveWebClientId: '網頁 OAuth 用戶端 ID（公開）',
+  driveSaveSetup: '儲存登入設定',
   driveConnect: '連接雲端硬碟',
   driveDisconnect: '中斷雲端硬碟連線',
   driveSync: '同步此文件',

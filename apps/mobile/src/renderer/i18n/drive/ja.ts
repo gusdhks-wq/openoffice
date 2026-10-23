@@ -1,5 +1,20 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: '作成待ちを取消（Driveのファイルは保持）',
+  driveLiveMode: '編集可能な Google ドキュメント',
+  driveBackupMode: '従来のファイルバックアップ',
+  driveLiveNotice:
+    'PCなしでプレーンテキストの Google ドキュメントを同期します。ChatGPTでは Google Drive から同じ文書を編集してください。表・書式付き・複数タブの文書はここでは編集しません。',
+  driveGoogleLink: 'Google ドキュメントを開く',
+  driveLiveConflict:
+    '両方で変更されています。下書きは保持されています。Driveの版を別に開いてください。',
+  driveUnsupported: '未対応の内容または書式です。原本と端末の下書きは保持されています。',
+  driveUncertain:
+    'Googleの処理結果を確認できません。同期を再試行して同じファイルを探してください。別のコピーを作成しないでください。',
+  driveSetupHint:
+    'Google Cloudで Drive API と Docs API を有効にしてください。Androidのパッケージと署名証明書、または現在のオリジン用のウェブOAuthクライアントを登録します。クライアントシークレットは不要です。',
+  driveWebClientId: 'ウェブOAuthクライアントID（公開）',
+  driveSaveSetup: 'ログイン設定を保存',
   driveConnect: 'ドライブに接続',
   driveDisconnect: 'ドライブを切断',
   driveSync: 'この文書を同期',

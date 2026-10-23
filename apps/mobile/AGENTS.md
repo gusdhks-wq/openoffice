@@ -19,7 +19,11 @@ editor with optional Drive sync, not the Electron shell or a cloud AI service.
   runtime list in `vite.config.ts` whenever adding a shipped dependency.
 - Drive access tokens stay in memory. Never store OAuth secrets in IndexedDB,
   Preferences, localStorage, logs or committed files. Only explicit connection
-  uses the Google SDK. Sync is append-only: do not PATCH/DELETE historical files.
+  uses the Google SDK. Legacy snapshot sync is append-only: do not PATCH/DELETE
+  historical files. The separately selected native Google Docs mode edits working
+  source documents with required revision IDs, preserves local conflicting drafts
+  and refuses unsupported native structure. Never flatten rich native documents
+  or automatically recreate a file after an uncertain creation result.
 - Do not imply real Drive authorization or AI is verified without live evidence.
   Follow `docs/plans/mobile-cloud.md` for the migration boundaries.
 

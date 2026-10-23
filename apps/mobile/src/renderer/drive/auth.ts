@@ -29,6 +29,19 @@ interface NativeAuthorization {
 }
 const NativeDrive = registerPlugin<NativeAuthorization>('DriveAuthorization')
 let sdk: Promise<GoogleOAuth> | null = null
+const clientKey = 'genoffice-google-public-client-id'
+export function googleWebClientId(): string {
+  try {
+    return localStorage.getItem(clientKey) || import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID || ''
+  } catch {
+    return import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID || ''
+  }
+}
+export function saveGoogleWebClientId(value: string): void {
+  const id = value.trim()
+  if (!/^[\w.-]+\.apps\.googleusercontent\.com$/.test(id)) throw new DriveFailure('invalid')
+  localStorage.setItem(clientKey, id)
+}
 
 export function validateToken(response: TokenResponse): DriveSession {
   const seconds = Number(response.expires_in)
@@ -86,7 +99,7 @@ export async function authorizeDrive(): Promise<DriveSession> {
     })
   }
   if (Capacitor.isNativePlatform()) throw new DriveFailure('auth')
-  const clientId = import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID as string | undefined
+  const clientId = googleWebClientId()
   if (!clientId || !/^[\w.-]+\.apps\.googleusercontent\.com$/.test(clientId))
     throw new DriveFailure('auth')
   const google = await loadGoogle()

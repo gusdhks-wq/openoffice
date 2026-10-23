@@ -1,5 +1,21 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: 'Zrušit čekající vytvoření (zachovat soubory Drive)',
+  driveLiveMode: 'Upravitelné dokumenty Google',
+  driveBackupMode: 'Původní zálohy souborů',
+  driveLiveNotice:
+    'Synchronizujte textové dokumenty Google bez PC. V ChatGPT upravujte stejný dokument přes Google Drive. Tabulky, formátované dokumenty a více karet se zde neupravují.',
+  driveGoogleLink: 'Otevřít dokument Google',
+  driveLiveConflict:
+    'Obě kopie se změnily. Koncept zůstává zachován. Otevřete kopii Drive samostatně.',
+  driveUnsupported:
+    'Nepodporovaný obsah nebo formátování. Originál i místní koncept zůstávají zachovány.',
+  driveUncertain:
+    'Výsledek Google je nejistý. Zkuste synchronizaci znovu, aby se našel stejný soubor; nevytvářejte další kopii.',
+  driveSetupHint:
+    'V Google Cloud zapněte Drive API a Docs API. Zaregistrujte balíček a podpisový certifikát Android nebo webového klienta OAuth pro tento původ. Tajný klíč klienta není potřeba.',
+  driveWebClientId: 'ID webového klienta OAuth (veřejné)',
+  driveSaveSetup: 'Uložit přihlášení',
   driveConnect: 'Připojit Drive',
   driveDisconnect: 'Odpojit Drive',
   driveSync: 'Synchronizovat tento dokument',

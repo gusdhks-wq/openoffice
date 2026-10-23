@@ -1,5 +1,21 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: 'Annuler la création en attente (garder les fichiers Drive)',
+  driveLiveMode: 'Documents Google modifiables',
+  driveBackupMode: 'Anciennes sauvegardes de fichiers',
+  driveLiveNotice:
+    'Synchronisez des documents Google en texte brut sans PC. Dans ChatGPT, utilisez Google Drive pour modifier le même document. Les tableaux, documents mis en forme ou à plusieurs onglets ne sont pas modifiés ici.',
+  driveGoogleLink: 'Ouvrir le document Google',
+  driveLiveConflict:
+    'Les deux copies ont changé. Le brouillon est conservé. Ouvrez séparément la copie Drive.',
+  driveUnsupported:
+    'Contenu ou mise en forme non pris en charge. L’original et le brouillon local sont conservés.',
+  driveUncertain:
+    'Résultat Google incertain. Relancez la synchronisation pour retrouver le même fichier, sans créer de copie.',
+  driveSetupHint:
+    'Activez Drive API et Docs API dans Google Cloud. Enregistrez le package et certificat Android ou un client OAuth Web pour cette origine exacte. Aucun secret client requis.',
+  driveWebClientId: 'ID client OAuth Web (public)',
+  driveSaveSetup: 'Enregistrer la connexion',
   driveConnect: 'Connecter Drive',
   driveDisconnect: 'Déconnecter Drive',
   driveSync: 'Synchroniser ce document',

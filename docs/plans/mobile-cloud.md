@@ -52,8 +52,13 @@ conversion works. No source from those projects was copied into this prototype.
    and one DOCX sample on device. Measure input, selection, memory and fidelity;
    choose Capacitor reuse versus native shell plus embedded web editor from
    measurements. Do not refactor document engines merely to share the shell.
-3. **Drive synchronization (prototype implemented, live setup pending).**
-   The mobile app now has browser GIS and native Android authorization paths,
+3. **Drive synchronization (native source-document mode added, live setup pending).**
+   The default Drive mode now uses a stable native Google source document with
+   guarded Docs API writes, durable uncertain-write recovery and foreground pull.
+   It is independent of the PC server. Rich native documents are refused; legacy
+   immutable snapshots remain a separate unchanged mode. Google Cloud/real account
+   authorization is still required and has not been verified.
+   The mobile app has browser GIS and native Android authorization paths,
    account-bound durable uploads, idempotent reserved IDs and append-only file
    snapshots. All conflicts preserve both heads. There is no canonical overwrite,
    history cleanup, arbitrary-file picker, OS background sync or live OAuth project

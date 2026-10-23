@@ -1,5 +1,18 @@
 import type zh from './zh'
 export default {
+  driveCancelPending: 'ยกเลิกการสร้างที่รออยู่ (เก็บไฟล์ Drive ไว้)',
+  driveLiveMode: 'เอกสาร Google ที่แก้ไขได้',
+  driveBackupMode: 'ข้อมูลสำรองไฟล์แบบเดิม',
+  driveLiveNotice:
+    'ซิงก์เอกสาร Google แบบข้อความล้วนโดยไม่ใช้ PC ใน ChatGPT ให้ใช้ Google Drive แก้ไขเอกสารเดียวกัน ไม่แก้ไขตาราง เอกสารที่มีรูปแบบ หรือหลายแท็บที่นี่',
+  driveGoogleLink: 'เปิดเอกสาร Google',
+  driveLiveConflict: 'ทั้งสองสำเนามีการเปลี่ยนแปลง เก็บฉบับร่างไว้แล้ว โปรดเปิดสำเนา Drive แยกกัน',
+  driveUnsupported: 'ไม่รองรับเนื้อหาหรือรูปแบบนี้ เก็บต้นฉบับและฉบับร่างบนเครื่องไว้แล้ว',
+  driveUncertain: 'ยังไม่ทราบผลจาก Google ลองซิงก์อีกครั้งเพื่อค้นหาไฟล์เดิม อย่าสร้างสำเนาใหม่',
+  driveSetupHint:
+    'เปิด Drive API และ Docs API ใน Google Cloud ลงทะเบียนแพ็กเกจและใบรับรอง Android หรือไคลเอนต์ OAuth เว็บสำหรับต้นทางนี้ ไม่ต้องใช้ข้อมูลลับไคลเอนต์',
+  driveWebClientId: 'รหัสไคลเอนต์ OAuth เว็บ (สาธารณะ)',
+  driveSaveSetup: 'บันทึกการเข้าสู่ระบบ',
   driveConnect: 'เชื่อมต่อ Drive',
   driveDisconnect: 'ยกเลิกการเชื่อมต่อ Drive',
   driveSync: 'ซิงค์เอกสารนี้',
