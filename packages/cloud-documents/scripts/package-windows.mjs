@@ -57,8 +57,23 @@ await mkdir(output, { recursive: true })
 await mkdir(join(output, 'runtime'))
 await cp(join(runtime, 'node.exe'), join(output, 'runtime/node.exe'))
 await cp(join(runtime, 'LICENSE'), join(output, 'runtime/LICENSE'))
+if (process.argv[4]) {
+  const connector = resolve(process.argv[4])
+  const binary = await readFile(join(connector, 'cloudflared.exe'))
+  if (binary.subarray(0, 2).toString() !== 'MZ')
+    throw new Error('Expected a Windows connector executable.')
+  await cp(join(connector, 'cloudflared.exe'), join(output, 'runtime/cloudflared.exe'))
+  await cp(join(connector, 'CLOUDFLARED-LICENSE'), join(output, 'runtime/CLOUDFLARED-LICENSE'))
+}
 for (const filename of ['LICENSE', 'NOTICE']) await cp(join(root, filename), join(output, filename))
-for (const filename of ['local.mjs', 'local-recovery.mjs', 'setup.mjs']) {
+for (const filename of [
+  'local.mjs',
+  'local-recovery.mjs',
+  'setup.mjs',
+  'mobile-connect.mjs',
+  'remote-oauth.mjs',
+  'remote-strings.mjs',
+]) {
   const target = join(output, 'packages/cloud-documents/scripts', filename)
   await mkdir(dirname(target), { recursive: true })
   await cp(join(root, 'packages/cloud-documents/scripts', filename), target)
@@ -93,6 +108,11 @@ for (const [directory, metadata] of packages) {
     `${metadata.name}@${metadata.version}\n${metadata.license || ''}\n${texts.join('\n')}`,
   )
 }
+if (process.argv[4])
+  notices.push(
+    'cloudflared@2026.10.3\n' +
+      (await readFile(join(resolve(process.argv[4]), 'CLOUDFLARED-LICENSE'), 'utf8')),
+  )
 await writeFile(join(output, 'THIRD-PARTY-NOTICES.txt'), notices.join('\n\n'))
 for (const filename of await readdir(join(root, 'packages/cloud-documents/portable'))) {
   await cp(join(root, 'packages/cloud-documents/portable', filename), join(output, filename))

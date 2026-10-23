@@ -35,14 +35,36 @@ jobs:
       - run: npm run test -w @genoffice/mobile
       - name: Download and verify bundled runtime
         run: python packages/cloud-documents/scripts/download-windows-runtime.py "${{ runner.temp }}/ieum-node"
+      - name: Download and verify mobile HTTPS connector
+        run: python packages/cloud-documents/scripts/download-mobile-connector.py windows "${{ runner.temp }}/ieum-cloudflared"
       - name: Assemble portable folder
-        run: node packages/cloud-documents/scripts/package-windows.mjs "${{ runner.temp }}/ieum-node/node-v22.23.4-win-x64" "${{ runner.temp }}/IeumOffice-Mobile-PC"
+        run: node packages/cloud-documents/scripts/package-windows.mjs "${{ runner.temp }}/ieum-node/node-v22.23.4-win-x64" "${{ runner.temp }}/IeumOffice-Mobile-PC" "${{ runner.temp }}/ieum-cloudflared"
       - name: Smoke test the portable folder
         run: node packages/cloud-documents/scripts/verify-portable.mjs "${{ runner.temp }}/IeumOffice-Mobile-PC"
+      - name: Verify live HTTPS and OAuth with synthetic documents
+        run: node packages/cloud-documents/scripts/verify-mobile-link.mjs "${{ runner.temp }}/IeumOffice-Mobile-PC"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: IeumOffice-Mobile-PC-Windows-x64-preview
           path: ${{ runner.temp }}/IeumOffice-Mobile-PC/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Assemble mobile connection add-on
+        shell: pwsh
+        run: |
+          $target = "${{ runner.temp }}/IeumOffice-Mobile-Connection"
+          New-Item -ItemType Directory -Force "$target/runtime", "$target/packages/cloud-documents/scripts" | Out-Null
+          Copy-Item "${{ runner.temp }}/ieum-cloudflared/*" "$target/runtime/"
+          Copy-Item packages/cloud-documents/portable/Mobile-connect.cmd "$target/"
+          Copy-Item packages/cloud-documents/portable/MOBILE.ko.txt "$target/"
+          foreach ($name in @('mobile-connect.mjs','remote-oauth.mjs','remote-strings.mjs')) {
+            Copy-Item "packages/cloud-documents/scripts/$name" "$target/packages/cloud-documents/scripts/"
+          }
+          Copy-Item LICENSE, NOTICE "$target/"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: IeumOffice-Mobile-Connection-Addon
+          path: ${{ runner.temp }}/IeumOffice-Mobile-Connection/
           if-no-files-found: error
           retention-days: 14
   android:
