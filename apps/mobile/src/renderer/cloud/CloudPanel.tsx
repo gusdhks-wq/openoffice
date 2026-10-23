@@ -35,7 +35,8 @@ interface Props {
 export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload }: Props) {
   const [address, setAddress] = useState(previousAddress)
   const [key, setKey] = useState('')
-  const [pairing, setPairing] = useState(true)
+  // The loopback PC server uses its existing owner-key setup; phones use the gateway.
+  const [pairing, setPairing] = useState(() => window.location.protocol !== 'http:')
   const token = useRef<string | null>(null)
   const [client, setClient] = useState<CloudDocumentsClient | null>(null)
   const [documents, setDocuments] = useState<DocumentInfo[]>([])

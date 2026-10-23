@@ -97,6 +97,8 @@ connection. Per-document sharing can be revoked immediately without a restart.
    retries the active linked document. OS background execution is not provided.
 
 A fresh connection requires a new phone code, or the owner key in manual mode.
+The loopback PC page defaults to manual owner-key mode; HTTPS/native phone pages
+default to short-code pairing through the optional gateway.
 Disconnecting the mobile app
 clears its in-memory connection; it does **not** revoke the separate external
 agent key or remove existing document sharing. Use Stop sharing for that purpose.
