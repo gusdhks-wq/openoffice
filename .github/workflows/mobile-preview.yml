@@ -39,15 +39,10 @@ jobs:
         run: node packages/cloud-documents/scripts/package-windows.mjs "${{ runner.temp }}/ieum-node/node-v22.23.4-win-x64" "${{ runner.temp }}/IeumOffice-Mobile-PC"
       - name: Smoke test the portable folder
         run: node packages/cloud-documents/scripts/verify-portable.mjs "${{ runner.temp }}/IeumOffice-Mobile-PC"
-      - name: Create ZIP
-        shell: pwsh
-        run: |
-          Compress-Archive -Path "${{ runner.temp }}/IeumOffice-Mobile-PC" -DestinationPath "${{ runner.temp }}/IeumOffice-Mobile-PC-Windows-x64-preview.zip"
-          Get-FileHash "${{ runner.temp }}/IeumOffice-Mobile-PC-Windows-x64-preview.zip" -Algorithm SHA256 | Format-List
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: IeumOffice-Mobile-PC-Windows-x64-preview
-          path: ${{ runner.temp }}/IeumOffice-Mobile-PC-Windows-x64-preview.zip
+          path: ${{ runner.temp }}/IeumOffice-Mobile-PC/
           if-no-files-found: error
           retention-days: 14
   android:

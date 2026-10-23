@@ -125,8 +125,8 @@ On Windows use `gradlew.bat signingReport`. A release signing certificate requir
 its own matching OAuth registration. Android uses Google's `AuthorizationClient`
 and system authorization UI through the local native bridge. It does not use the
 browser client ID or need a `google-services.json` file. A device with Google Play
-services is required. Native compilation and real authorization remain unverified
-until an Android SDK, device and configured project are available. Review Google
+services is required. The native bridge compiles in the debug APK. Real authorization
+remains unverified until a device and configured project are available. Review Google
 SDK terms and native third-party notices before distributing an APK.
 
 ### What synchronization does
