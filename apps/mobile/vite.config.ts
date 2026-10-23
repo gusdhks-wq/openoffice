@@ -48,14 +48,16 @@ function offlineShell(): Plugin {
           source: readFileSync(resolve(import.meta.dirname, '../..', filename), 'utf8'),
         })
       }
-      this.emitFile({ type: 'asset', fileName: 'THIRD-PARTY-NOTICES.txt', source: notices })
       this.emitFile({
         type: 'asset',
-        fileName: 'THIRD-PARTY-LICENSES-rhwp.md',
-        source: readFileSync(
-          resolve(import.meta.dirname, '../../vendor/rhwp-core/THIRD_PARTY_LICENSES.md'),
-          'utf8',
-        ),
+        fileName: 'THIRD-PARTY-NOTICES.txt',
+        source:
+          notices +
+          '\n\n' +
+          readFileSync(
+            resolve(import.meta.dirname, '../../vendor/rhwp-core/THIRD_PARTY_LICENSES.md'),
+            'utf8',
+          ),
       })
       const files = Object.keys(bundle)
       const fingerprint = Object.values(bundle).map((item) =>

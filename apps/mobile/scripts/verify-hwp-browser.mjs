@@ -7,6 +7,16 @@ import init, { HwpDocument } from '@rhwp/core'
 
 const app = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const origin = 'https://mobile.example'
+// Every precached asset must also pass the optional public gateway's static allowlist.
+const worker = await readFile(resolve(app, 'dist/sw.js'), 'utf8')
+const precache = JSON.parse(/const FILES = (\[[^;]+\]);/.exec(worker)[1])
+for (const file of precache) {
+  assert.match(
+    file,
+    /^\.\/(?:index\.html|LICENSE\.txt|NOTICE\.txt|THIRD-PARTY-NOTICES\.txt|assets\/[A-Za-z0-9_.-]+)$/,
+  )
+  await readFile(resolve(app, 'dist', file))
+}
 await init({ module_or_path: await readFile(resolve(app, '../../vendor/rhwp-core/rhwp_bg.wasm')) })
 const fixture = HwpDocument.createEmpty()
 fixture.createBlankDocument()
