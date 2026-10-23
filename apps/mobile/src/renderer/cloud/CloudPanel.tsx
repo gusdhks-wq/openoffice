@@ -12,9 +12,17 @@ import {
   copyCloudDocument,
   openCloudDocument,
   restoreCloudDocument,
+  reconnectCloudDocument,
   shareCloudDocument,
   syncCloudDocument,
 } from './sync'
+import {
+  connectionAddress,
+  previousAddress,
+  rememberAddress,
+  pairPhone,
+  disconnectPhone,
+} from './connection'
 
 interface Props {
   store: DocumentStore | null
@@ -25,8 +33,9 @@ interface Props {
   onReload(id?: string): Promise<void>
 }
 export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload }: Props) {
-  const [address, setAddress] = useState('')
+  const [address, setAddress] = useState(previousAddress)
   const [key, setKey] = useState('')
+  const [pairing, setPairing] = useState(true)
   const token = useRef<string | null>(null)
   const [client, setClient] = useState<CloudDocumentsClient | null>(null)
   const [documents, setDocuments] = useState<DocumentInfo[]>([])
@@ -43,6 +52,12 @@ export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload 
   const dirty =
     !!active &&
     (!!active.pendingCloudUpload || (!!active.cloud && exportDocument(active) !== active.cloud.raw))
+  const oldBinding = active?.cloud || active?.pendingCloudUpload
+  const canReconnect =
+    !!client &&
+    !!oldBinding &&
+    oldBinding.workspaceId === client.workspaceId &&
+    oldBinding.origin !== client.origin
 
   async function run(action: () => Promise<string | void>) {
     if (!store || disabled || inFlight.current) return
@@ -60,7 +75,9 @@ export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload 
       setMessage(
         error instanceof DocumentFailure && error.code === 'conflict'
           ? 'cloudConflict'
-          : 'cloudFailed',
+          : error instanceof DocumentFailure && error.code === 'unauthorized'
+            ? 'cloudAuthFailed'
+            : 'cloudFailed',
       )
       await onReload().catch(() => {})
     } finally {
@@ -102,12 +119,22 @@ export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload 
           onSubmit={(event) => {
             event.preventDefault()
             void run(async () => {
-              token.current = key
-              const next = new CloudDocumentsClient(address, () => token.current)
-              if ((await next.connect()).role !== 'owner') throw new DocumentFailure('unauthorized')
-              setDocuments(await next.list())
-              setClient(next)
-              setKey('')
+              const origin = connectionAddress(address)
+              token.current = pairing ? await pairPhone(origin, key) : key.trim()
+              try {
+                const next = new CloudDocumentsClient(origin, () => token.current)
+                if ((await next.connect()).role !== 'owner')
+                  throw new DocumentFailure('unauthorized')
+                setDocuments(await next.list())
+                setClient(next)
+                setAddress(origin)
+                rememberAddress(origin)
+                setKey('')
+              } catch (error) {
+                await disconnectPhone(origin, token.current)
+                token.current = null
+                throw error
+              }
             })
           }}
         >
@@ -123,13 +150,30 @@ export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload 
             />
           </label>
           <label>
-            {t('cloudKey')}
+            {t('cloudMethod')}
+            <select
+              value={pairing ? 'code' : 'key'}
+              onChange={(event) => {
+                setPairing(event.target.value === 'code')
+                setKey('')
+              }}
+            >
+              <option value="code">{t('cloudPairCode')}</option>
+              <option value="key">{t('cloudKey')}</option>
+            </select>
+          </label>
+          {pairing && <p>{t('cloudPairHelp')}</p>}
+          <label>
+            {t(pairing ? 'cloudPairCode' : 'cloudKey')}
             <input
               type="password"
               required
               value={key}
               onChange={(event) => setKey(event.target.value)}
               autoComplete="off"
+              inputMode={pairing ? 'numeric' : undefined}
+              pattern={pairing ? '[0-9]{8}' : undefined}
+              maxLength={pairing ? 8 : undefined}
             />
           </label>
           <button disabled={disabled || busy}>{t('cloudConnect')}</button>
@@ -165,6 +209,7 @@ export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload 
           <button
             disabled={disabled || busy}
             onClick={() => {
+              void disconnectPhone(client.origin, token.current)
               token.current = null
               setClient(null)
               setKey('')
@@ -181,6 +226,21 @@ export function CloudPanel({ store, active, disabled, t, onBusyChange, onReload 
         {t(message)}
       </p>
       {active?.pendingCloudUpload && <p>{t('cloudPending')}</p>}
+      {canReconnect && (
+        <div>
+          <p>{t('cloudReconnectHelp')}</p>
+          <button
+            disabled={disabled || busy}
+            onClick={() =>
+              void run(async () => {
+                await reconnectCloudDocument(store!, active!.id, client!)
+              })
+            }
+          >
+            {t('cloudReconnect')}
+          </button>
+        </div>
+      )}
       {client && active && bound && (
         <div className="cloud-actions">
           <button

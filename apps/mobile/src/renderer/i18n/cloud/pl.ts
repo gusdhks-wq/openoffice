@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: 'Sposób połączenia',
+  cloudPairCode: 'Kod telefonu (8 cyfr)',
+  cloudPairHelp:
+    'Wpisz kod telefonu z okna Mobile-connect na komputerze. Ważny jednorazowo przez 3 minuty. Wpisz P i naciśnij Enter na komputerze, aby uzyskać nowy kod. To inny kod niż kod zatwierdzenia ChatGPT.',
+  cloudAuthFailed:
+    'Uwierzytelnienie wygasło lub kod jest nieprawidłowy. Uzyskaj nowy kod telefonu na komputerze i połącz ponownie.',
+  cloudReconnect: 'Połącz dokument z bieżącym adresem',
+  cloudReconnectHelp:
+    'Ten sam serwer dokumentów ma nowy adres. Połącz ponownie, zachowując wersję roboczą urządzenia i poprzednie wersje.',
   cloudTitle: 'Dokumenty dla zewnętrznego Codex',
   cloudURL: 'Adres serwera dokumentów',
   cloudKey: 'Klucz połączenia właściciela',

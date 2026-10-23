@@ -188,8 +188,10 @@ footer {
   gap: 4px;
   font-size: 14px;
 }
-.cloud-panel input {
+.cloud-panel input,
+.cloud-panel select {
   width: 100%;
+  max-width: 100%;
   min-height: 44px;
   padding: 8px;
   border: 1px solid var(--border);

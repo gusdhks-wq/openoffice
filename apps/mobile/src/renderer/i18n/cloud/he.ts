@@ -1,5 +1,13 @@
 import type zh from './zh'
 export default {
+  cloudMethod: 'שיטת חיבור',
+  cloudPairCode: 'קוד הטלפון (8 ספרות)',
+  cloudPairHelp:
+    'יש להזין את קוד הטלפון מחלון Mobile-connect במחשב. הקוד תקף פעם אחת למשך 3 דקות. לקבלת קוד חדש יש להקליד P ואז Enter במחשב. זהו קוד נפרד מקוד האישור של ChatGPT.',
+  cloudAuthFailed: 'האימות פג או שהקוד שגוי. יש לקבל קוד טלפון חדש במחשב ולהתחבר שוב.',
+  cloudReconnect: 'חיבור המסמך לכתובת הנוכחית',
+  cloudReconnectHelp:
+    'הכתובת של אותו שרת מסמכים השתנתה. אפשר להתחבר שוב תוך שמירת הטיוטה במכשיר והגרסאות הקודמות.',
   cloudTitle: 'מסמכים עבור Codex חיצוני',
   cloudURL: 'כתובת שרת המסמכים',
   cloudKey: 'מפתח חיבור הבעלים',

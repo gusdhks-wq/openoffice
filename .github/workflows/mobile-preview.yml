@@ -55,13 +55,14 @@ jobs:
         shell: pwsh
         run: |
           $target = "${{ runner.temp }}/IeumOffice-Mobile-Connection"
-          New-Item -ItemType Directory -Force "$target/runtime", "$target/packages/cloud-documents/scripts" | Out-Null
+          New-Item -ItemType Directory -Force "$target/runtime", "$target/packages/cloud-documents/scripts", "$target/apps/mobile" | Out-Null
           Copy-Item "${{ runner.temp }}/ieum-cloudflared/*" "$target/runtime/"
           Copy-Item packages/cloud-documents/portable/Mobile-connect.cmd "$target/"
           Copy-Item packages/cloud-documents/portable/MOBILE.ko.txt "$target/"
-          foreach ($name in @('mobile-connect.mjs','remote-oauth.mjs','remote-strings.mjs')) {
+          foreach ($name in @('mobile-connect.mjs','remote-oauth.mjs','remote-strings.mjs','mobile-pairing.mjs')) {
             Copy-Item "packages/cloud-documents/scripts/$name" "$target/packages/cloud-documents/scripts/"
           }
+          Copy-Item -Recurse apps/mobile/dist "$target/apps/mobile/"
           Copy-Item LICENSE, NOTICE "$target/"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

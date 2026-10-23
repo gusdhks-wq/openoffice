@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: 'Metodo di connessione',
+  cloudPairCode: 'Codice del telefono (8 cifre)',
+  cloudPairHelp:
+    'Inserisci il codice del telefono dalla finestra Mobile-connect sul PC. Valido una volta per 3 minuti. Digita P e premi Invio sul PC per un nuovo codice. È diverso dal codice di approvazione ChatGPT.',
+  cloudAuthFailed:
+    'Autenticazione scaduta o codice errato. Ottieni un nuovo codice del telefono sul PC e riconnettiti.',
+  cloudReconnect: 'Riconnetti questo documento all’indirizzo attuale',
+  cloudReconnectHelp:
+    'Lo stesso server documenti ha un nuovo indirizzo. Riconnettiti mantenendo la bozza del dispositivo e le versioni precedenti.',
   cloudTitle: 'Documenti per Codex esterno',
   cloudURL: 'Indirizzo del server documenti',
   cloudKey: 'Chiave di connessione del proprietario',

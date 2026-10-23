@@ -76,12 +76,16 @@ conversion works. No source from those projects was copied into this prototype.
    A worker must continue after the phone disconnects, return job status, avoid
    duplicate commits after retries and retain the pre-edit version. Check the
    base version again before publishing an AI edit.
-5. **External agent connection (MCP/HTTP implementation tested locally).**
+5. **External agent connection (user PC/ChatGPT/Android round trip verified).**
    The service advertises six document tools through authenticated Streamable HTTP
    MCP and includes a plain HTTP command helper. Real MCP SDK initialize/read/edit
-   flows pass locally. Hosted ChatGPT/Codex support still requires a supported
-   plugin/credential connection and reachable HTTPS deployment; the service is
-   not installed into this chat. Expose the same operations through a documented
+   flows pass locally. The user installed the custom ChatGPT plugin through the
+   temporary HTTPS gateway and completed a real shared-document round trip.
+   ChatGPT changed the document to `test complete`, the user confirmed it on
+   Android, then saved `mobile test` on Android; ChatGPT read that exact content
+   and its new server revision. This verifies foreground shared-document access,
+   not automatic tool availability in every Codex product or PC-independent hosting.
+   Expose the same operations through a documented
    API and an authenticated remote MCP adapter where supported. Verify the exact
    Codex cloud product's connection capabilities with one read and one write;
    an MCP endpoint alone does not guarantee that product can connect. Keep the
@@ -98,8 +102,10 @@ save, reconnect and synchronize. With the PC off, request a cloud edit and close
 the mobile app. Reopen later to retrieve the result, inspect the change, undo it
 and open the same file on desktop. Simultaneous edits must preserve both versions.
 Local editing/recovery and foreground Drive synchronization are implemented.
-Drive has been verified with simulated responses only. The external-agent document service is implemented and tested locally. Hosted
-connection and deployment remain pending; app-hosted AI execution is not included.
+Drive has been verified with simulated responses only. The external-agent service
+and temporary HTTPS/OAuth gateway have a user-confirmed Windows/Android/ChatGPT
+round trip. The PC-off acceptance case and permanent hosting remain pending;
+app-hosted AI execution is not included.
 
 ## Open setup decisions
 
@@ -113,3 +119,9 @@ connection and deployment remain pending; app-hosted AI execution is not include
 - The prototype retains drafts but does not yet offer document deletion, renaming,
   rich-text editing, PDF viewing or cloud AI. Drive sync is an optional prototype
   that still needs configured-project and physical-device validation.
+
+## Next sequence selected by the user (2026-10-24)
+
+1. Connection usability: short PC-to-phone pairing code, public address prefilling/recall, and explicit reconnection of a local draft when the same workspace changes URL. Keep secrets in memory and preserve queued operation IDs and revision conflicts.
+2. Expand mobile editing and document management after connection usability.
+3. Plan PC-independent hosting afterward; do not provision paid resources or imply the temporary tunnel is permanent.

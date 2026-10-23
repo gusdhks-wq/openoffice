@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: 'Verbindingsmethode',
+  cloudPairCode: 'Telefooncode (8 cijfers)',
+  cloudPairHelp:
+    'Voer de telefooncode uit het PC-venster Mobile-connect in. Eenmalig geldig gedurende 3 minuten. Typ P en druk op Enter op de PC voor een nieuwe code. Dit is niet de ChatGPT-goedkeuringscode.',
+  cloudAuthFailed:
+    'De aanmelding is verlopen of de code is onjuist. Vraag op de PC een nieuwe telefooncode aan en verbind opnieuw.',
+  cloudReconnect: 'Dit document opnieuw verbinden met het huidige adres',
+  cloudReconnectHelp:
+    'Dezelfde documentserver heeft een nieuw adres. Verbind opnieuw met behoud van het concept op dit apparaat en eerdere versies.',
   cloudTitle: 'Documenten voor externe Codex',
   cloudURL: 'Adres van documentserver',
   cloudKey: 'Verbindingssleutel van eigenaar',

@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: 'Phương thức kết nối',
+  cloudPairCode: 'Mã điện thoại (8 chữ số)',
+  cloudPairHelp:
+    'Nhập mã điện thoại trong cửa sổ Mobile-connect trên PC. Mã dùng một lần trong 3 phút. Gõ P rồi nhấn Enter trên PC để lấy mã mới. Mã này khác mã phê duyệt ChatGPT.',
+  cloudAuthFailed:
+    'Xác thực hết hạn hoặc mã không đúng. Lấy mã điện thoại mới trên PC và kết nối lại.',
+  cloudReconnect: 'Kết nối lại tài liệu này với địa chỉ hiện tại',
+  cloudReconnectHelp:
+    'Máy chủ tài liệu cũ có địa chỉ mới. Kết nối lại sẽ giữ bản nháp trên thiết bị và các phiên bản trước.',
   cloudTitle: 'Tài liệu cho Codex bên ngoài',
   cloudURL: 'Địa chỉ máy chủ tài liệu',
   cloudKey: 'Khóa kết nối chủ sở hữu',

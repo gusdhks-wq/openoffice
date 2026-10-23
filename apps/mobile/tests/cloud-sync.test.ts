@@ -19,6 +19,7 @@ import {
   openCloudDocument,
   shareCloudDocument,
   restoreCloudDocument,
+  reconnectCloudDocument,
 } from '../src/renderer/cloud/sync'
 const cleanup: (() => void | Promise<void>)[] = []
 afterEach(async () => {
@@ -36,8 +37,8 @@ async function setup() {
   await local.save(doc)
   let loseResponse = false
   class LocalClient extends CloudDocumentsClient {
-    constructor() {
-      super('https://documents.example.com', () => 'test')
+    constructor(origin = 'https://documents.example.com') {
+      super(origin, () => 'test')
       this.workspaceId = remote.workspaceId
     }
     override async connect() {
@@ -77,6 +78,7 @@ async function setup() {
     remote,
     doc,
     client: new LocalClient(),
+    atAddress: (origin: string) => new LocalClient(origin),
     loseNext: () => {
       loseResponse = true
     },
@@ -87,6 +89,41 @@ async function get(store: DocumentStore, id: string) {
 }
 
 describe('mobile and external-agent document exchange', () => {
+  it('explicitly reconnects an interrupted upload at a new URL without duplicating the committed operation', async () => {
+    const { local, remote, doc, client, atAddress, loseNext } = await setup()
+    loseNext()
+    await expect(syncCloudDocument(local, doc.id, client)).rejects.toThrow('lost-response')
+    const before = await get(local, doc.id),
+      next = atAddress('https://new.example.com')
+    await expect(syncCloudDocument(local, doc.id, next)).rejects.toThrow('invalid')
+    await reconnectCloudDocument(local, doc.id, next)
+    const rebound = await get(local, doc.id)
+    expect(rebound.pendingCloudUpload?.operationId).toBe(before.pendingCloudUpload?.operationId)
+    expect(rebound.pendingCloudUpload?.origin).toBe(next.origin)
+    expect(exportDocument(rebound)).toBe(exportDocument(before))
+    await syncCloudDocument(local, doc.id, next)
+    expect(remote.list('owner')).toHaveLength(1)
+    expect((await get(local, doc.id)).cloud?.origin).toBe(next.origin)
+  })
+  it('preserves a stale offline draft across an address change and still rejects concurrent edits', async () => {
+    const { local, remote, doc, client, atAddress } = await setup()
+    await syncCloudDocument(local, doc.id, client)
+    const linked = await get(local, doc.id)
+    await local.save(updateDocument(linked, 'offline draft'))
+    await remote.update('owner', linked.cloud!.id, {
+      operationId: crypto.randomUUID(),
+      baseRevision: linked.cloud!.revision,
+      content: 'other edit',
+    })
+    const next = atAddress('https://new.example.com')
+    await reconnectCloudDocument(local, doc.id, next)
+    expect((await get(local, doc.id)).text).toBe('offline draft')
+    await expect(syncCloudDocument(local, doc.id, next)).rejects.toThrow('conflict')
+    expect(remote.read('owner', linked.cloud!.id).content).toBe('other edit')
+    next.workspaceId = 'other-workspace'
+    await expect(reconnectCloudDocument(local, doc.id, next)).rejects.toThrow('invalid')
+    expect((await get(local, doc.id)).text).toBe('offline draft')
+  })
   it('uploads exact source privately, shares explicitly, and receives an external edit', async () => {
     const { local, remote, doc, client } = await setup()
     await syncCloudDocument(local, doc.id, client)

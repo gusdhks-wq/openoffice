@@ -6,8 +6,8 @@ versions, and does not execute a model or call the OpenAI API. Your external
 Codex session supplies the reasoning and invokes these document tools.
 
 This is a runnable prototype, not an already deployed cloud service. No hosting
-account, domain, production connection key, OpenAI API key or plugin installation
-has been provisioned. Google Drive is a separate optional connection, not the
+account, domain, production connection key or OpenAI API key has been provisioned.
+The user's temporary PC/Android/ChatGPT plugin round trip is verified. Google Drive is a separate optional connection, not the
 storage backend of this service. A document can be connected to both, but they
 have independent versions and conflict handling.
 
@@ -25,6 +25,24 @@ provides a temporary HTTPS address for the existing Android app or phone browser
 The gateway preserves backend authentication and permits only the app origins and
 public app origin; private files and arbitrary upstream targets are excluded.
 
+Updated clients can pair using the PC's **phone pairing code** instead of copying
+the owner key. The code expires in three minutes, works once and allows at most
+five attempts. Type `P` then Enter in the running PC window to replace the code
+without restarting the tunnel or invalidating ChatGPT. The phone receives its own
+eight-hour owner REST session, held only in memory; disconnect revokes that session.
+At most eight sessions are active per connector. Phone sessions cannot authorize
+MCP calls. The private owner key is never returned to the phone. Closing the
+connector invalidates all phone sessions, separately from the backend keys.
+
+In a phone browser the current server address is filled automatically. Updated
+Android clients remember only the last successfully connected public address,
+never the key, code or session token. A pasted `/mcp` suffix is removed for phone
+connections. If a temporary URL changes, connect to the new URL and explicitly
+reconnect a local document only after the server's persistent workspace ID matches.
+Queued operation IDs, base revisions and drafts remain intact; concurrent changes
+still cause a conflict. A browser's local drafts remain tied to its browser origin;
+upload or export drafts before leaving an old temporary URL.
+
 For ChatGPT custom MCP setup use that address plus `/mcp`, OAuth and dynamic
 client registration (DCR). Approve with the one-time code shown on the PC, never
 with a ChatGPT password or document owner key. Tokens cover only agent access to
@@ -39,7 +57,8 @@ after restart, both PC processes must remain running, and no production hosting
 is provisioned. The JSON MCP transport avoids Quick Tunnel SSE limitations.
 See `portable/MOBILE.ko.txt` for user steps. A synthetic Windows test verified
 real HTTPS, Android-origin requests and DCR/approval/PKCE through the public
-connector; actual user device and ChatGPT plugin calls must still be verified.
+connector. Actual user Android/ChatGPT read/write round trips were confirmed on
+2026-10-24; the new short-code UI still needs user-device verification.
 
 ## Local setup
 
@@ -77,7 +96,8 @@ connection. Per-document sharing can be revoked immediately without a restart.
    1.5 seconds of inactivity and completed IME composition. Reconnecting also
    retries the active linked document. OS background execution is not provided.
 
-A fresh connection requires the owner key again. Disconnecting the mobile app
+A fresh connection requires a new phone code, or the owner key in manual mode.
+Disconnecting the mobile app
 clears its in-memory connection; it does **not** revoke the separate external
 agent key or remove existing document sharing. Use Stop sharing for that purpose.
 
@@ -135,10 +155,10 @@ must be verified for the specific cloud product.
 
 The core service provides a bearer-authenticated MCP endpoint. The optional
 `Mobile-connect.cmd` gateway adds OAuth for private custom ChatGPT plugin setup;
-it does not publish a plugin or install tools in this chat. MCP SDK calls and
-a synthetic real-HTTPS OAuth exchange are verified, **not a user's actual hosted
-Codex/ChatGPT session**. Do not describe a user connection as complete until an
-actual tool call succeeds.
+it does not publish a plugin or automatically install tools into a chat. MCP SDK
+calls, synthetic real-HTTPS OAuth and the user's installed custom ChatGPT plugin
+read/write round trip are verified. Other Codex environments still require their
+own supported connection; a connection is complete only after an actual tool call.
 
 A cloud coding environment that permits HTTPS requests and provides the agent
 credential at runtime can alternatively use the included HTTP helper:

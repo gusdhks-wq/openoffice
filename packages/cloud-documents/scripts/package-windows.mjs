@@ -73,6 +73,7 @@ for (const filename of [
   'mobile-connect.mjs',
   'remote-oauth.mjs',
   'remote-strings.mjs',
+  'mobile-pairing.mjs',
 ]) {
   const target = join(output, 'packages/cloud-documents/scripts', filename)
   await mkdir(dirname(target), { recursive: true })

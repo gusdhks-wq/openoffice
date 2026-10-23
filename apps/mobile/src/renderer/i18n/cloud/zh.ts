@@ -1,4 +1,11 @@
 export default {
+  cloudMethod: '连接方式',
+  cloudPairCode: '手机配对码（8位）',
+  cloudPairHelp:
+    '输入电脑 Mobile-connect 窗口中的手机配对码。有效期3分钟，仅可使用一次。在电脑中输入 P 后按回车可生成新码。此码不同于 ChatGPT 授权码。',
+  cloudAuthFailed: '认证已过期或配对码错误。请在电脑上获取新的手机配对码后重新连接。',
+  cloudReconnect: '将此文档重新连接到当前地址',
+  cloudReconnectHelp: '同一文档服务器的地址已更改。重新连接会保留本机草稿和历史版本。',
   cloudTitle: '外部 Codex 文档',
   cloudURL: '文档服务器地址',
   cloudKey: '所有者连接密钥',

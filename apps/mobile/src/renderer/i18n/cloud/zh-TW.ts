@@ -1,5 +1,12 @@
 import type zh from './zh'
 export default {
+  cloudMethod: '連線方式',
+  cloudPairCode: '手機配對碼（8位）',
+  cloudPairHelp:
+    '輸入電腦 Mobile-connect 視窗中的手機配對碼。有效期限3分鐘，僅可使用一次。在電腦輸入 P 後按 Enter 可產生新碼。此碼不同於 ChatGPT 授權碼。',
+  cloudAuthFailed: '驗證已過期或配對碼錯誤。請在電腦取得新的手機配對碼後重新連線。',
+  cloudReconnect: '將此文件重新連線至目前位址',
+  cloudReconnectHelp: '同一文件伺服器的位址已變更。重新連線會保留本機草稿和歷史版本。',
   cloudTitle: '外部 Codex 文件',
   cloudURL: '文件伺服器位址',
   cloudKey: '擁有者連線金鑰',

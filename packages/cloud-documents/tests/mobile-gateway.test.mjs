@@ -7,6 +7,7 @@ import { join } from 'node:path'
 import { startDocumentServer } from '../src/server.ts'
 import { makeMobileGateway } from '../scripts/mobile-connect.mjs'
 import { createRemoteOAuth } from '../scripts/remote-oauth.mjs'
+import { createMobilePairing } from '../scripts/mobile-pairing.mjs'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 const cleanup = [],
@@ -46,12 +47,15 @@ async function setup() {
       approval = code
     },
   })
+  const pairing = createMobilePairing()
   const gateway = makeMobileGateway({
     webPort,
     apiPort: new URL(backend.url).port,
     getPublicOrigin: () => ORIGIN,
     getOAuth: () => oauth,
     agentToken: AGENT,
+    ownerToken: OWNER,
+    pairing,
   })
   const port = await listen(gateway),
     url = `http://127.0.0.1:${port}`
@@ -109,7 +113,7 @@ async function setup() {
     expect(response.status).toBe(200)
     return (await response.json()).access_token
   }
-  return { backend, url, authorize }
+  return { backend, url, authorize, pairing }
 }
 async function mcp(url, token) {
   const client = new Client({ name: 'gateway-test', version: '1' })
@@ -123,6 +127,81 @@ async function mcp(url, token) {
   return client
 }
 describe('mobile HTTPS gateway boundaries', () => {
+  it('pairs a native phone for REST owner access without exposing the owner key or granting MCP access', async () => {
+    const s = await setup(),
+      code = s.pairing.issue()
+    const pair = (code, origin = 'https://localhost') =>
+      fetch(s.url + '/pair', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin },
+        body: JSON.stringify({ code }),
+      })
+    expect((await pair(code, 'https://evil.example')).status).toBe(403)
+    expect(
+      (
+        await fetch(s.url + '/pair', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ code }),
+        })
+      ).status,
+    ).toBe(403)
+    expect(
+      (
+        await fetch(s.url + '/pair', {
+          method: 'OPTIONS',
+          headers: { origin: 'https://localhost' },
+        })
+      ).status,
+    ).toBe(204)
+    const response = await pair(code)
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    const text = await response.text()
+    expect(text).not.toContain(OWNER)
+    const { token } = JSON.parse(text)
+    expect((await pair(code)).status).toBe(401)
+    const connection = await fetch(s.url + '/v1/connection', {
+      headers: { authorization: `Bearer ${token}`, origin: 'https://localhost' },
+    })
+    expect((await connection.json()).role).toBe('owner')
+    expect(
+      (
+        await fetch(s.backend.url + '/v1/connection', {
+          headers: { authorization: `Bearer ${token}` },
+        })
+      ).status,
+    ).toBe(401)
+    expect(
+      (
+        await fetch(s.url + '/mcp', {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+        })
+      ).status,
+    ).toBe(401)
+    expect(
+      (
+        await fetch(s.url + '/pair/disconnect', {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${token}`,
+            'content-type': 'application/json',
+            origin: ORIGIN,
+          },
+          body: '{}',
+        })
+      ).status,
+    ).toBe(204)
+    expect(
+      (
+        await fetch(s.url + '/v1/connection', {
+          headers: { authorization: `Bearer ${token}` },
+        })
+      ).status,
+    ).toBe(401)
+  })
   it('bounds anonymous protocol payloads before forwarding them', async () => {
     const s = await setup()
     const response = await fetch(s.url + '/mcp', {

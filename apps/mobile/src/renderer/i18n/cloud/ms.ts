@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: 'Kaedah sambungan',
+  cloudPairCode: 'Kod telefon (8 digit)',
+  cloudPairHelp:
+    'Masukkan kod telefon daripada tetingkap Mobile-connect pada PC. Sah sekali selama 3 minit. Taip P kemudian Enter pada PC untuk kod baharu. Kod ini berbeza daripada kod kelulusan ChatGPT.',
+  cloudAuthFailed:
+    'Pengesahan tamat tempoh atau kod salah. Dapatkan kod telefon baharu pada PC dan sambung semula.',
+  cloudReconnect: 'Sambung semula dokumen ini ke alamat semasa',
+  cloudReconnectHelp:
+    'Pelayan dokumen yang sama mempunyai alamat baharu. Sambung semula sambil mengekalkan draf peranti dan versi terdahulu.',
   cloudTitle: 'Dokumen untuk Codex luaran',
   cloudURL: 'Alamat pelayan dokumen',
   cloudKey: 'Kunci sambungan pemilik',

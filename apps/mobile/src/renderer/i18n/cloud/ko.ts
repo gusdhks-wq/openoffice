@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: '연결 방법',
+  cloudPairCode: '휴대폰 연결 코드 (8자리)',
+  cloudPairHelp:
+    'PC Mobile-connect 창의 휴대폰 코드를 입력하세요. 3분 동안 한 번만 사용할 수 있습니다. 새 코드는 PC 창에 P를 입력하고 Enter를 누르세요. ChatGPT 승인 코드와는 다릅니다.',
+  cloudAuthFailed:
+    '인증이 만료됐거나 코드가 맞지 않습니다. PC에서 새 휴대폰 코드를 받아 다시 연결하세요.',
+  cloudReconnect: '이 문서를 현재 주소에 다시 연결',
+  cloudReconnectHelp:
+    '같은 문서 서버의 주소가 바뀌었습니다. 이 기기의 초안과 이전 버전을 보존한 채 다시 연결할 수 있습니다.',
   cloudTitle: '외부 Codex 문서 연결',
   cloudURL: '문서 서버 주소',
   cloudKey: '소유자 연결키',

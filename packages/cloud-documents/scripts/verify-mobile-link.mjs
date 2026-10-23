@@ -6,10 +6,11 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { createServer } from 'node:net'
 import { createHash, randomBytes } from 'node:crypto'
+import { chromium } from 'playwright-core'
 const source = resolve(process.argv[2]),
   temporary = await mkdtemp(join(tmpdir(), 'ieum-mobile-https-'))
 const root = join(temporary, 'app')
-let serverProcess, linkProcess
+let serverProcess, linkProcess, browser
 async function freePort() {
   const s = createServer()
   s.listen(0, '127.0.0.1')
@@ -66,7 +67,7 @@ try {
     }),
   })
   assert.equal(created.status, 201)
-  const document = (await created.json()).document
+  let document = (await created.json()).document
   linkProcess = spawn(executable, ['packages/cloud-documents/scripts/mobile-connect.mjs'], {
     cwd: root,
     env,
@@ -74,12 +75,14 @@ try {
   })
   let origin,
     approval,
+    phoneCode,
     logs = ''
   linkProcess.stdout.on('data', (data) => {
     logs = (logs + String(data)).slice(-12000)
     origin =
       /Mobile server address: (https:\/\/[a-z0-9-]+\.trycloudflare\.com)/.exec(logs)?.[1] || origin
     approval = /PC approval code \(3 minutes\): ([0-9]{8})/.exec(logs)?.[1] || approval
+    phoneCode = /Phone pairing code \(3 minutes, one use\): ([0-9]{8})/.exec(logs)?.[1] || phoneCode
   })
   linkProcess.stderr.resume()
   await waitReady(linkProcess, () => !!origin, 'HTTPS connector')
@@ -106,6 +109,29 @@ try {
   assert.equal(phone.document.content, '# Remote phone test\n')
   assert.equal((await fetch(origin + '/.env.cloud.local')).status, 404)
   assert.equal((await fetch(origin + '/v1/documents')).status, 401)
+  await waitReady(linkProcess, () => !!phoneCode, 'Phone pairing code')
+  browser = await chromium.launch({ channel: 'chrome' })
+  const page = await browser.newPage({ viewport: { width: 412, height: 915 }, locale: 'en-US' })
+  await page.goto(origin)
+  const panel = page.locator('.cloud-panel')
+  await panel.locator('summary').click()
+  assert.equal(await panel.locator('input[type="url"]').inputValue(), origin)
+  await panel.locator('input[type="password"]').fill(phoneCode)
+  await panel.getByRole('button', { name: 'Connect server', exact: true }).click()
+  await panel.getByRole('button', { name: 'phone.md', exact: true }).click()
+  assert.equal(await page.locator('textarea').inputValue(), '# Remote phone test\n')
+  const saved = await page.evaluate(() => JSON.stringify(localStorage))
+  assert.ok(saved.includes(origin))
+  assert.ok(!saved.includes(owner) && !saved.includes('phone_') && !saved.includes(phoneCode))
+  await page.locator('textarea').fill('# Saved by phone\n')
+  await panel.getByRole('button', { name: 'Sync document', exact: true }).click()
+  await panel.getByRole('status').filter({ hasText: 'Document server connected' }).waitFor()
+  const synced = await (await fetch(`${api}/v1/documents/${document.id}`, { headers })).json()
+  assert.equal(synced.document.content, '# Saved by phone\n')
+  document = synced.document
+  await panel.getByRole('button', { name: 'Disconnect server', exact: true }).click()
+  await browser.close()
+  browser = undefined
   const redirect = 'https://chatgpt.com/connector/oauth/test_https_flow'
   const register = await fetch(origin + '/register', {
     method: 'POST',
@@ -228,9 +254,10 @@ try {
 
   assert.equal(await readFile(join(root, '.env.cloud.local'), 'utf8'), settings)
   console.log(
-    'PASS real HTTPS tunnel, Android-origin owner connection, private-file/auth boundaries, DCR + PC approval + PKCE and shared-only MCP access. No OpenAI API or real user data used.',
+    'PASS real HTTPS tunnel, actual Chromium phone pairing and document open, Android-origin owner connection, private-file/auth boundaries, DCR + PC approval + PKCE and shared-only MCP access. No OpenAI API or real user data used.',
   )
 } finally {
+  await browser?.close()
   if (linkProcess && linkProcess.exitCode === null) {
     const exited = once(linkProcess, 'exit')
     linkProcess.send('stop-mobile-link')

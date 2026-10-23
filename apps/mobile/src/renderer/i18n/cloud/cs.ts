@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: 'Způsob připojení',
+  cloudPairCode: 'Kód telefonu (8 číslic)',
+  cloudPairHelp:
+    'Zadejte kód telefonu z okna Mobile-connect na počítači. Platí jednou po dobu 3 minut. Pro nový kód zadejte na počítači P a stiskněte Enter. Jde o jiný kód než schvalovací kód ChatGPT.',
+  cloudAuthFailed:
+    'Ověření vypršelo nebo je kód nesprávný. Získejte na počítači nový kód telefonu a připojte se znovu.',
+  cloudReconnect: 'Připojit tento dokument k aktuální adrese',
+  cloudReconnectHelp:
+    'Stejný server dokumentů má novou adresu. Připojte se znovu se zachováním místního konceptu a předchozích verzí.',
   cloudTitle: 'Dokumenty pro externí Codex',
   cloudURL: 'Adresa serveru dokumentů',
   cloudKey: 'Připojovací klíč vlastníka',

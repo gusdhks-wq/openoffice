@@ -1,5 +1,14 @@
 import type zh from './zh'
 export default {
+  cloudMethod: '接続方法',
+  cloudPairCode: 'スマートフォン接続コード（8桁）',
+  cloudPairHelp:
+    'PCの Mobile-connect ウィンドウに表示されたスマートフォン用コードを入力します。3分間有効で1回限りです。PCで P と Enter を押すと再発行できます。ChatGPTの承認コードとは別です。',
+  cloudAuthFailed:
+    '認証の期限切れ、またはコードが違います。PCで新しいスマートフォン用コードを取得して再接続してください。',
+  cloudReconnect: 'この文書を現在のアドレスに再接続',
+  cloudReconnectHelp:
+    '同じ文書サーバーのアドレスが変更されました。端末の下書きと過去の版を保持して再接続できます。',
   cloudTitle: '外部 Codex の文書',
   cloudURL: '文書サーバーのアドレス',
   cloudKey: '所有者の接続キー',

@@ -81,6 +81,33 @@ async function flush(store: DocumentStore, id: string, client: CloudDocumentsCli
   })
 }
 
+/** Explicitly move a local binding to a new URL for the same authenticated workspace. */
+export async function reconnectCloudDocument(
+  store: DocumentStore,
+  id: string,
+  client: CloudDocumentsClient,
+): Promise<void> {
+  if (!client.workspaceId) await client.connect()
+  await mutate(store, id, (current) => {
+    const bindings = [current.cloud, current.pendingCloudUpload].filter((value) => !!value)
+    if (!bindings.length || bindings.some((value) => value.workspaceId !== client.workspaceId))
+      throw new DocumentFailure('invalid')
+    if (
+      current.cloud &&
+      current.pendingCloudUpload &&
+      current.cloud.origin !== current.pendingCloudUpload.origin
+    )
+      throw new DocumentFailure('invalid')
+    return {
+      ...current,
+      ...(current.cloud ? { cloud: { ...current.cloud, origin: client.origin } } : {}),
+      ...(current.pendingCloudUpload
+        ? { pendingCloudUpload: { ...current.pendingCloudUpload, origin: client.origin } }
+        : {}),
+    }
+  })
+}
+
 export async function syncCloudDocument(
   store: DocumentStore,
   id: string,

@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url'
 import { loadEnvFile } from 'node:process'
 import { timingSafeEqual } from 'node:crypto'
 import { createRemoteOAuth } from './remote-oauth.mjs'
+import { createMobilePairing } from './mobile-pairing.mjs'
+import { createInterface } from 'node:readline'
 
 export function makeMobileGateway({
   webPort = 5181,
@@ -14,6 +16,8 @@ export function makeMobileGateway({
   getPublicOrigin,
   getOAuth = () => undefined,
   agentToken,
+  ownerToken,
+  pairing,
 }) {
   const server = createServer((incoming, outgoing) => {
     const origin = incoming.headers.origin
@@ -47,7 +51,8 @@ export function makeMobileGateway({
       oauth.handler(incoming, outgoing)
       return
     }
-    const api = /^\/(?:v1(?:\/|$)|mcp(?:\/|$)|health$)/.test(url.pathname)
+    const pair = ['/pair', '/pair/disconnect'].includes(url.pathname)
+    const api = pair || /^\/(?:v1(?:\/|$)|mcp(?:\/|$)|health$)/.test(url.pathname)
     const asset =
       url.pathname === '/' ||
       /^\/(?:index\.html|sw\.js|LICENSE\.txt|NOTICE\.txt|THIRD-PARTY-NOTICES\.txt|assets\/[A-Za-z0-9_.-]+)$/.test(
@@ -82,6 +87,57 @@ export function makeMobileGateway({
     void (async () => {
       let body
       let authorization = incoming.headers.authorization
+      if (pair) {
+        outgoing.setHeader('Cache-Control', 'no-store')
+        outgoing.setHeader('Content-Type', 'application/json')
+        if (
+          !origin ||
+          incoming.method !== 'POST' ||
+          !pairing ||
+          !ownerToken ||
+          !String(incoming.headers['content-type']).startsWith('application/json')
+        ) {
+          outgoing.writeHead(403).end(JSON.stringify({ error: 'unauthorized' }))
+          return
+        }
+        const chunks = []
+        let size = 0
+        for await (const chunk of incoming) {
+          size += chunk.length
+          if (size > 1024) {
+            outgoing.writeHead(413).end(JSON.stringify({ error: 'limit' }))
+            return
+          }
+          chunks.push(chunk)
+        }
+        if (url.pathname === '/pair/disconnect') {
+          pairing.revoke(/^Bearer (.+)$/i.exec(authorization || '')?.[1])
+          outgoing.writeHead(204).end()
+          return
+        }
+        let request
+        try {
+          request = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+        } catch {
+          outgoing.writeHead(400).end(JSON.stringify({ error: 'invalid' }))
+          return
+        }
+        const token = pairing.redeem(request?.code)
+        if (!token) {
+          outgoing.writeHead(401).end(JSON.stringify({ error: 'unauthorized' }))
+          return
+        }
+        outgoing.end(JSON.stringify({ token }))
+        return
+      }
+      // A phone session is owner access to REST only; it is never an MCP/agent credential.
+      if (
+        url.pathname.startsWith('/v1/') &&
+        ownerToken &&
+        pairing?.verify(/^Bearer (.+)$/i.exec(authorization || '')?.[1])
+      ) {
+        authorization = `Bearer ${ownerToken}`
+      }
       if (url.pathname === '/mcp') {
         const oauth = getOAuth()
         if (!oauth || !agentToken) {
@@ -262,15 +318,19 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   await writeFile(config, '{}\n', { mode: 0o600 })
   loadEnvFile(join(root, '.env.cloud.local'))
   const agentToken = process.env.GENOFFICE_CLOUD_AGENT_TOKEN
-  if (!agentToken || agentToken.length < 32)
-    throw new Error('External agent connection is not configured.')
+  const ownerToken = process.env.GENOFFICE_CLOUD_OWNER_TOKEN
+  if (!agentToken || agentToken.length < 32 || !ownerToken || ownerToken.length < 32)
+    throw new Error('Document connections are not configured.')
   let publicOrigin, oauth
+  const pairing = createMobilePairing()
   const gateway = makeMobileGateway({
     webPort,
     apiPort,
     getPublicOrigin: () => publicOrigin,
     getOAuth: () => oauth,
     agentToken,
+    ownerToken,
+    pairing,
   })
   await new Promise((done, fail) => {
     gateway.once('error', fail)
@@ -310,8 +370,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     })
     announced = true
     console.log(`Mobile server address: ${publicOrigin}`)
+    console.log(`Phone pairing code (3 minutes, one use): ${pairing.issue()}`)
     console.log(
-      'In the Android app: External Codex documents > enter this HTTPS address and your OWNER key > Connect > Refresh server documents.',
+      'Type P then Enter here for a new phone code; existing phone and ChatGPT sessions stay connected.',
+    )
+    console.log(
+      'Open this address on your phone and enter the PHONE pairing code. Updated Android apps also support pairing. Older apps can still use their OWNER key.',
     )
     console.log(
       'Or open this HTTPS address in the phone browser. Keep this window and Start.cmd running. The address changes after restart.',
@@ -330,6 +394,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   }
   child.stdout.on('data', log)
   child.stderr.on('data', log)
+  const terminal = process.stdin.isTTY ? createInterface({ input: process.stdin }) : undefined
+  terminal?.on('line', (line) => {
+    if (announced && line.trim().toLowerCase() === 'p')
+      console.log(`Phone pairing code (3 minutes, one use): ${pairing.issue()}`)
+  })
   const timeout = setTimeout(() => {
     if (!announced) {
       console.error(
@@ -341,6 +410,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   async function stop() {
     if (stopping) return
     stopping = true
+    terminal?.close()
     clearTimeout(timeout)
     child.kill('SIGTERM')
     const closed = new Promise((done) => gateway.close(done))
