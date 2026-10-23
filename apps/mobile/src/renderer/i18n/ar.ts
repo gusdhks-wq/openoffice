@@ -1,6 +1,8 @@
+import cloud from './cloud/ar'
 import drive from './drive/ar'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'نموذج تطبيق الهاتف',
   newDocument: 'مستند جديد',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'تعذر فتح التخزين المحلي. أعد تحميل الصفحة.',
   importFailed: 'اختر ملف UTF-8 بصيغة .md أو .txt أصغر من 2 ميغابايت.',
   exportFailed: 'تعذر تصدير الملف.',
-  localOnly: 'تخزين محلي فقط. لم يتم ربط Drive والذكاء الاصطناعي السحابي.',
+  localOnly: 'تُحفظ المستندات على هذا الجهاز أولاً. الاتصالات الخارجية اختيارية.',
   untitled: 'بدون عنوان',
   empty: 'أنشئ مستندًا أو استورده للبدء.',
   language: 'اللغة',

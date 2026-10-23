@@ -1,6 +1,8 @@
+import cloud from './cloud/ja'
 import drive from './drive/ja'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'モバイル試作版',
   newDocument: '新規文書',
@@ -16,7 +18,7 @@ export default {
   openFailed: '端末の保存領域を開けません。再読み込みしてください。',
   importFailed: '2 MB 未満の UTF-8 の .md または .txt ファイルを選択してください。',
   exportFailed: 'ファイルを書き出せませんでした。',
-  localOnly: '端末内のみ保存。ドライブとクラウド AI は未接続です。',
+  localOnly: '文書はまず端末に保存されます。外部接続は任意です。',
   untitled: '無題',
   empty: '文書を作成または読み込んでください。',
   language: '言語',

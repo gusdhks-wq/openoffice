@@ -66,12 +66,22 @@ conversion works. No source from those projects was copied into this prototype.
    Verify actual API precondition/version capabilities before selecting an
    atomic write strategy. Google Docs files and binary office files have
    different APIs and are not interchangeable synchronization targets.
-4. **Cloud document operations.** Add authenticated document lookup/read/create/
+4. **Cloud document operations (local prototype implemented).**
+   `packages/cloud-documents` now provides a persistent single-owner HTTP service,
+   conditional versioned edits, restoration, explicit per-document agent sharing,
+   idempotent receipts and account-separated connection keys. Mobile clients use
+   a persistent workspace ID to bind pending transfers. Deployment is pending.
+   No AI API is called. Add authenticated document lookup/read/create/
    edit/validate/commit operations with access scoped to selected documents.
    A worker must continue after the phone disconnects, return job status, avoid
    duplicate commits after retries and retain the pre-edit version. Check the
    base version again before publishing an AI edit.
-5. **External agent connection.** Expose the same operations through a documented
+5. **External agent connection (MCP/HTTP implementation tested locally).**
+   The service advertises six document tools through authenticated Streamable HTTP
+   MCP and includes a plain HTTP command helper. Real MCP SDK initialize/read/edit
+   flows pass locally. Hosted ChatGPT/Codex support still requires a supported
+   plugin/credential connection and reachable HTTPS deployment; the service is
+   not installed into this chat. Expose the same operations through a documented
    API and an authenticated remote MCP adapter where supported. Verify the exact
    Codex cloud product's connection capabilities with one read and one write;
    an MCP endpoint alone does not guarantee that product can connect. Keep the
@@ -88,7 +98,8 @@ save, reconnect and synchronize. With the PC off, request a cloud edit and close
 the mobile app. Reopen later to retrieve the result, inspect the change, undo it
 and open the same file on desktop. Simultaneous edits must preserve both versions.
 Local editing/recovery and foreground Drive synchronization are implemented.
-Drive has been verified with simulated responses only. Cloud AI remains unimplemented.
+Drive has been verified with simulated responses only. The external-agent document service is implemented and tested locally. Hosted
+connection and deployment remain pending; app-hosted AI execution is not included.
 
 ## Open setup decisions
 

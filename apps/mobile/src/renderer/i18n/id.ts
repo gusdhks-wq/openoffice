@@ -1,6 +1,8 @@
+import cloud from './cloud/id'
 import drive from './drive/id'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'Prototipe seluler',
   newDocument: 'Dokumen baru',
@@ -16,7 +18,8 @@ export default {
   openFailed: 'Penyimpanan lokal tidak dapat dibuka. Muat ulang halaman.',
   importFailed: 'Pilih berkas UTF-8 .md atau .txt di bawah 2 MB.',
   exportFailed: 'Berkas tidak dapat diekspor.',
-  localOnly: 'Hanya penyimpanan lokal. Drive dan AI awan belum terhubung.',
+  localOnly:
+    'Dokumen disimpan di perangkat ini terlebih dahulu. Koneksi eksternal bersifat opsional.',
   untitled: 'Tanpa judul',
   empty: 'Buat atau impor dokumen untuk memulai.',
   language: 'Bahasa',

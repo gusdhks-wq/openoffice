@@ -1,5 +1,7 @@
+import cloud from './cloud/zh'
 import drive from './drive/zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: '移动版原型',
   newDocument: '新建文档',
@@ -15,7 +17,7 @@ export default {
   openFailed: '无法打开本地存储，请刷新重试。',
   importFailed: '请选择小于 2 MB 的 UTF-8 .md 或 .txt 文件。',
   exportFailed: '无法导出文件。',
-  localOnly: '仅保存在本机。尚未连接云盘和云端 AI。',
+  localOnly: '文档先保存在本机，外部连接为可选项。',
   untitled: '无标题',
   empty: '创建或导入文档以开始。',
   language: '语言',

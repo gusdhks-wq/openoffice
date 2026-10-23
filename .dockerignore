@@ -1,0 +1,14 @@
+.git
+**/node_modules
+**/dist
+**/out
+**/release
+**/target
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+apps/mobile/android
+apps/mobile/ios
+packages/cloud-documents/data
+.ieumoffice-cloud-data

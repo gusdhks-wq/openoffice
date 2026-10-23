@@ -1,6 +1,8 @@
+import cloud from './cloud/he'
 import drive from './drive/he'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'אב טיפוס לנייד',
   newDocument: 'מסמך חדש',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'לא ניתן לפתוח אחסון מקומי. יש לרענן את הדף.',
   importFailed: 'יש לבחור קובץ UTF-8 מסוג .md או .txt הקטן מ־2 MB.',
   exportFailed: 'לא ניתן לייצא את הקובץ.',
-  localOnly: 'אחסון מקומי בלבד. Drive ובינה מלאכותית בענן אינם מחוברים.',
+  localOnly: 'המסמכים נשמרים תחילה במכשיר זה. חיבורים חיצוניים הם לבחירה.',
   untitled: 'ללא כותרת',
   empty: 'יש ליצור או לייבא מסמך כדי להתחיל.',
   language: 'שפה',

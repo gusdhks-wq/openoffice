@@ -1,6 +1,8 @@
+import cloud from './cloud/ru'
 import drive from './drive/ru'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'Мобильный прототип',
   newDocument: 'Новый документ',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'Не удалось открыть локальное хранилище. Обновите страницу.',
   importFailed: 'Выберите файл UTF-8 .md или .txt размером менее 2 МБ.',
   exportFailed: 'Не удалось экспортировать файл.',
-  localOnly: 'Только локальное хранение. Диск и облачный ИИ не подключены.',
+  localOnly: 'Документы сначала сохраняются на этом устройстве. Внешние подключения необязательны.',
   untitled: 'Без названия',
   empty: 'Создайте или импортируйте документ.',
   language: 'Язык',

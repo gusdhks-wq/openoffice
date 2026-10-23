@@ -97,6 +97,7 @@ export async function synchronizeDocument(
         throw new DriveFailure('conflict')
       const loaded = importDocument(head.name, new TextEncoder().encode(raw))
       return {
+        ...current,
         ...loaded,
         id: current.id,
         drive: { accountId, documentId, fileId: head.id, fileVersion: head.version, raw },

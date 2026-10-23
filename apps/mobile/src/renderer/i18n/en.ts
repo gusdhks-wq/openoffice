@@ -1,6 +1,8 @@
+import cloud from './cloud/en'
 import drive from './drive/en'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'Mobile prototype',
   newDocument: 'New document',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'Could not open local storage. Reload to retry.',
   importFailed: 'Choose a UTF-8 .md or .txt file under 2 MB.',
   exportFailed: 'Could not export the file.',
-  localOnly: 'Local documents only. Drive and cloud AI are not connected.',
+  localOnly: 'Documents are saved on this device first. External connections are optional.',
   untitled: 'Untitled',
   empty: 'Create or import a document to start.',
   language: 'Language',

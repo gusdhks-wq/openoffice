@@ -617,3 +617,10 @@
   selection, automatic merging, history pruning, canonical-file overwrite,
   native background execution or cloud AI. These limits are visible in the
   mobile setup guide and do not silently widen Drive permissions.
+
+## Optional external-agent document service (2026-10-23)
+
+- **Implemented.** `packages/cloud-documents` supplies persistent UTF-8 Markdown/text documents, authenticated REST and six MCP tools. It never runs a model or calls the OpenAI API. Separate owner/agent keys, explicit document sharing (including retained history), revision checks, atomic history and idempotent writes protect local drafts and retries. Mobile keys remain in memory. Workspace IDs bind pending uploads to one persistent workspace.
+- **Verified.** Mobile tests and store/browser/real HTTP-MCP integration tests pass. A Chromium mobile viewport connected to a temporary real server and MCP SDK client: private upload, explicit sharing, external edit and mobile retrieval, offline concurrent-edit conflict, private copy, agent-created document, access revocation, no saved keys and no page errors. These checks use synthetic credentials and no AI subscription.
+- **Pending.** No public HTTPS host, published plugin, real hosted Codex session, production secret provisioning, native Android build or Google login has been tested. The setup and client compatibility distinctions are documented in `packages/cloud-documents/README.md`; the Dockerfile is an unverified deployment template. CLI MCP success does not establish hosted Codex/plugin availability.
+- **Limits.** Single server process/data volume; 256 documents, 128 retained versions per document, 4096 idempotency receipts and 64 MiB total storage. No automatic merge, multi-user accounts, model runner, background mobile sync or history pruning. Google Drive snapshots remain a separate optional connection.

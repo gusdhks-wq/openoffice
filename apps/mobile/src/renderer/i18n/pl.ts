@@ -1,6 +1,8 @@
+import cloud from './cloud/pl'
 import drive from './drive/pl'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'Prototyp mobilny',
   newDocument: 'Nowy dokument',
@@ -16,7 +18,8 @@ export default {
   openFailed: 'Nie można otworzyć pamięci lokalnej. Odśwież stronę.',
   importFailed: 'Wybierz plik UTF-8 .md lub .txt mniejszy niż 2 MB.',
   exportFailed: 'Nie można wyeksportować pliku.',
-  localOnly: 'Tylko pamięć lokalna. Dysk i AI w chmurze nie są połączone.',
+  localOnly:
+    'Dokumenty są najpierw zapisywane na tym urządzeniu. Połączenia zewnętrzne są opcjonalne.',
   untitled: 'Bez tytułu',
   empty: 'Utwórz lub zaimportuj dokument, aby rozpocząć.',
   language: 'Język',

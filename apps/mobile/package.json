@@ -21,7 +21,8 @@
     "@genoffice/i18n": "*",
     "@genoffice/ui": "*",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "@genoffice/cloud-documents": "*"
   },
   "devDependencies": {
     "@capacitor/android": "^8.0.0",

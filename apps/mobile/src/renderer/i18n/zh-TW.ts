@@ -1,6 +1,8 @@
+import cloud from './cloud/zh-TW'
 import drive from './drive/zh-TW'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: '行動版原型',
   newDocument: '新增文件',
@@ -16,7 +18,7 @@ export default {
   openFailed: '無法開啟本機儲存空間，請重新整理後再試。',
   importFailed: '請選擇小於 2 MB 的 UTF-8 .md 或 .txt 檔案。',
   exportFailed: '無法匯出檔案。',
-  localOnly: '僅儲存在本機。尚未連接雲端硬碟與雲端 AI。',
+  localOnly: '文件會先儲存在本機，外部連線為選用項目。',
   untitled: '未命名',
   empty: '建立或匯入文件以開始。',
   language: '語言',

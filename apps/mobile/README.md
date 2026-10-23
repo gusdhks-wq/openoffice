@@ -5,7 +5,8 @@ Capacitor/React application, not the Electron shell in a WebView. It currently
 edits Markdown and plain text **as source**, not as the desktop rich-text editor.
 It makes no AI requests. Optional Google Drive authorization and append-only
 synchronization are implemented, but require your Google Cloud configuration.
-There is no background cloud service.
+An optional external-agent document service is provided separately in
+`packages/cloud-documents`; it requires its own running server and connection keys.
 
 ## Run
 
@@ -193,3 +194,24 @@ concurrent-write rejection, interrupted Drive uploads, account binding, branches
 stream limits, token scope checks and repeatable native project configuration. The repository-wide test/typecheck scripts include
 this workspace. See [the implementation plan](../../docs/plans/mobile-cloud.md)
 for the next milestones and the distinction between local editing and cloud AI.
+
+## External Codex document connection
+
+The mobile UI now has an **External Codex documents** section. It connects to the
+separate document service using an HTTPS origin (localhost for development) and
+an in-memory owner connection key. Upload a document, explicitly enable sharing,
+and a permitted external MCP client can read and edit it. The app preserves local
+drafts on version conflicts and can open the server version separately or publish
+a new copy. Version restoration appends a new server revision.
+
+The service does not call an AI API. It is not automatically installed as a tool
+in this chat or Codex cloud. See the [service setup and support limits](../../packages/cloud-documents/README.md).
+Documents from the owner are private until shared. Disconnecting the mobile app
+does not revoke the separate agent key: use Stop sharing or rotate that key.
+
+The current cloud connection automatically synchronizes only the open linked
+document, checks for external edits while idle, and retains queued operations
+across restarts. Credentials must be entered again after restart. The server
+workspace ID prevents a queued upload moving into a different workspace at the
+same URL. Google Drive synchronization is independent; this service does not read
+or persist Google tokens.

@@ -1,6 +1,8 @@
+import cloud from './cloud/ms'
 import drive from './drive/ms'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'Prototaip mudah alih',
   newDocument: 'Dokumen baharu',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'Storan setempat tidak dapat dibuka. Muat semula halaman.',
   importFailed: 'Pilih fail UTF-8 .md atau .txt di bawah 2 MB.',
   exportFailed: 'Fail tidak dapat dieksport.',
-  localOnly: 'Storan setempat sahaja. Drive dan AI awan belum disambungkan.',
+  localOnly: 'Dokumen disimpan pada peranti ini dahulu. Sambungan luaran adalah pilihan.',
   untitled: 'Tanpa tajuk',
   empty: 'Cipta atau import dokumen untuk bermula.',
   language: 'Bahasa',

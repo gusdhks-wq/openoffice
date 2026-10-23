@@ -1,6 +1,8 @@
+import cloud from './cloud/hi'
 import drive from './drive/hi'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'मोबाइल प्रारूप',
   newDocument: 'नया दस्तावेज़',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'स्थानीय संग्रह नहीं खुला। पृष्ठ फिर लोड करें।',
   importFailed: '2 MB से छोटी UTF-8 .md या .txt फ़ाइल चुनें।',
   exportFailed: 'फ़ाइल निर्यात नहीं हुई।',
-  localOnly: 'केवल स्थानीय संग्रह। Drive और क्लाउड AI जुड़े नहीं हैं।',
+  localOnly: 'दस्तावेज़ पहले इस डिवाइस पर सहेजे जाते हैं। बाहरी कनेक्शन वैकल्पिक हैं।',
   untitled: 'बिना शीर्षक',
   empty: 'शुरू करने के लिए दस्तावेज़ बनाएँ या आयात करें।',
   language: 'भाषा',

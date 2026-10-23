@@ -5,6 +5,7 @@ import { downloadDocument } from './files'
 import { openDocumentStore, type DocumentStore } from './store'
 import { translate, type MessageKey } from './i18n'
 import { DrivePanel } from './drive/DrivePanel'
+import { CloudPanel } from './cloud/CloudPanel'
 
 export function App() {
   const [lang, setLang] = useState<Lang>(() => normalizeLang(navigator.language))
@@ -15,6 +16,7 @@ export function App() {
   const store = useRef<DocumentStore | null>(null)
   const [database, setDatabase] = useState<DocumentStore | null>(null)
   const [driveBusy, setDriveBusy] = useState(false)
+  const [cloudBusy, setCloudBusy] = useState(false)
   const [composing, setComposing] = useState(false)
   const latest = useRef<LocalDocument | null>(null)
   const persistedRevisions = useRef(new Map<string, number>())
@@ -100,7 +102,7 @@ export function App() {
     setStatus('saved')
   }
 
-  const canNavigate = status === 'saved' && !driveBusy
+  const canNavigate = status === 'saved' && !driveBusy && !cloudBusy
   function createDocument() {
     if (!canNavigate) return
     void navigator.storage?.persist?.().catch(() => {})
@@ -168,9 +170,17 @@ export function App() {
       <DrivePanel
         store={database}
         active={active}
-        disabled={status !== 'saved' || composing}
+        disabled={status !== 'saved' || composing || cloudBusy}
         t={t}
         onBusyChange={setDriveBusy}
+        onReload={reload}
+      />
+      <CloudPanel
+        store={database}
+        active={active}
+        disabled={status !== 'saved' || composing || driveBusy}
+        t={t}
+        onBusyChange={setCloudBusy}
         onReload={reload}
       />
       {error && <p role="alert">{t(error)}</p>}
@@ -199,7 +209,7 @@ export function App() {
                 aria-label={t('editor')}
                 value={active.text}
                 spellCheck={false}
-                disabled={driveBusy}
+                disabled={driveBusy || cloudBusy}
                 onCompositionStart={() => setComposing(true)}
                 onCompositionEnd={() => setComposing(false)}
                 autoCapitalize="off"

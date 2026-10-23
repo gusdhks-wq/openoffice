@@ -1,6 +1,8 @@
+import cloud from './cloud/th'
 import drive from './drive/th'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'แอปมือถือต้นแบบ',
   newDocument: 'เอกสารใหม่',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'เปิดที่เก็บข้อมูลในเครื่องไม่ได้ โปรดโหลดหน้าใหม่',
   importFailed: 'เลือกไฟล์ UTF-8 .md หรือ .txt ขนาดไม่เกิน 2 MB',
   exportFailed: 'ส่งออกไฟล์ไม่ได้',
-  localOnly: 'จัดเก็บในเครื่องเท่านั้น ยังไม่เชื่อมต่อ Drive และ AI บนคลาวด์',
+  localOnly: 'เอกสารจะบันทึกในอุปกรณ์นี้ก่อน การเชื่อมต่อภายนอกเป็นตัวเลือก',
   untitled: 'ไม่มีชื่อ',
   empty: 'สร้างหรือนำเข้าเอกสารเพื่อเริ่มต้น',
   language: 'ภาษา',

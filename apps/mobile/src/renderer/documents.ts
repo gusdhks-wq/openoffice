@@ -1,3 +1,4 @@
+import type { CloudBinding, PendingCloudUpload } from './cloud/sync'
 import type { DriveBinding, PendingUpload } from './drive/types'
 import { readSourceText, writeSourceText } from '../../../markdown/src/shared/source-text'
 import type { SourceTextFormat } from '../../../markdown/src/shared/source-text'
@@ -13,6 +14,8 @@ export interface LocalDocument {
   updatedAt: number
   drive?: DriveBinding
   pendingUpload?: PendingUpload
+  cloud?: CloudBinding
+  pendingCloudUpload?: PendingCloudUpload
 }
 export const MAX_IMPORT_BYTES = 2 * 1024 * 1024
 

@@ -1,6 +1,8 @@
+import cloud from './cloud/cs'
 import drive from './drive/cs'
 import type zh from './zh'
 export default {
+  ...cloud,
   ...drive,
   prototype: 'Mobilní prototyp',
   newDocument: 'Nový dokument',
@@ -16,7 +18,7 @@ export default {
   openFailed: 'Místní úložiště nelze otevřít. Obnovte stránku.',
   importFailed: 'Vyberte soubor UTF-8 .md nebo .txt menší než 2 MB.',
   exportFailed: 'Soubor nelze exportovat.',
-  localOnly: 'Pouze místní úložiště. Disk a cloudová AI nejsou připojeny.',
+  localOnly: 'Dokumenty se nejprve ukládají do tohoto zařízení. Externí připojení jsou volitelná.',
   untitled: 'Bez názvu',
   empty: 'Začněte vytvořením nebo importem dokumentu.',
   language: 'Jazyk',

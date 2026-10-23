@@ -48,3 +48,6 @@ _scratch-*
 # Local planning and agent state (never committed)
 .dryforge
 .omc
+
+# Private external-agent document store (never commit user documents)
+/.ieumoffice-cloud-data/

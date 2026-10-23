@@ -1,0 +1,22 @@
+import type zh from './zh'
+export default {
+  cloudTitle: '外部 Codex 文件',
+  cloudURL: '文件伺服器位址',
+  cloudKey: '擁有者連線金鑰',
+  cloudConnect: '連接伺服器',
+  cloudDisconnect: '中斷伺服器連線',
+  cloudSync: '同步文件',
+  cloudRefresh: '重新整理伺服器文件',
+  cloudShare: '分享給外部 Codex',
+  cloudUnshare: '停止分享',
+  cloudVersions: '歷史版本',
+  cloudRestore: '還原',
+  cloudCopy: '以新文件上傳',
+  cloudConnected: '文件伺服器已連接',
+  cloudDisconnected: '文件伺服器未連接',
+  cloudBusy: '正在處理伺服器文件…',
+  cloudFailed: '伺服器操作失敗，本機草稿已保留。',
+  cloudConflict: '伺服器有其他修改，請另行開啟或將草稿上傳為新文件。',
+  cloudPending: '等待上傳至伺服器',
+  cloudNotice: '外部 Codex 只能讀取和修改已分享的文件。連線金鑰僅在本次執行的記憶體中保留。',
+} satisfies Record<keyof typeof zh, string>
