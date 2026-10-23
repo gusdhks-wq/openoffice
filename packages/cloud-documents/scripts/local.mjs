@@ -5,6 +5,7 @@ import { resolve, dirname, extname, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn, spawnSync } from 'node:child_process'
 import { loadEnvFile } from 'node:process'
+import { localProblem, recoverLocalLock } from './local-recovery.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 process.chdir(root)
@@ -85,10 +86,33 @@ const web = createServer((request, response) => {
     response.end()
   })
 })
+const dataDirectory = resolve(process.env.GENOFFICE_CLOUD_DATA_DIR || './.ieumoffice-cloud-data')
+if (process.argv.includes('--recover-lock')) {
+  try {
+    const recovered = await recoverLocalLock(dataDirectory, [webPort, apiPort])
+    console.log(
+      recovered
+        ? 'Recovered a stale lock. Existing documents and keys were preserved.'
+        : 'No stale lock to recover.',
+    )
+  } catch (error) {
+    const known = [
+      'PORT_IN_USE',
+      'RECOVERY_BUSY',
+      'STORE_LOCK_ACTIVE',
+      'STORE_LOCK_UNKNOWN',
+      'STORE_LOCK_CHANGED',
+    ]
+    console.error(
+      `Recovery stopped: ${known.includes(error.message) ? error.message : 'RECOVERY_FAILED'}. No document or settings reset was performed.`,
+    )
+    process.exit(1)
+  }
+}
 let service
 try {
   service = await startDocumentServer({
-    directory: resolve(process.env.GENOFFICE_CLOUD_DATA_DIR || './.ieumoffice-cloud-data'),
+    directory: dataDirectory,
     ownerToken: process.env.GENOFFICE_CLOUD_OWNER_TOKEN || '',
     agentToken: process.env.GENOFFICE_CLOUD_AGENT_TOKEN,
     host: '127.0.0.1',
@@ -99,11 +123,21 @@ try {
     web.once('error', fail)
     web.listen(webPort, '127.0.0.1', done)
   })
-} catch {
+} catch (error) {
   if (service) await service.close()
-  console.error(
-    'Local startup failed. Check the selected local ports, private settings and the document-store lock. Existing data was not reset.',
-  )
+  let reason = error.code === 'EADDRINUSE' ? 'PORT_IN_USE' : 'STORE_OR_SETTINGS_ERROR'
+  try {
+    reason = await localProblem(dataDirectory, [webPort, apiPort])
+  } catch {}
+  console.error(`Local startup failed: ${reason}. Existing documents and keys were preserved.`)
+  if (reason === 'STORE_LOCK_STALE')
+    console.error(
+      'Close other app windows, then run Repair-and-start.cmd. It refuses recovery if the recorded process is still running.',
+    )
+  if (reason === 'PORT_IN_USE' || reason === 'STORE_LOCK_ACTIVE')
+    console.error(
+      'Another process is using this workspace or port. Do not remove the lock; stop the existing instance first.',
+    )
   process.exit(1)
 }
 console.log(`Mobile editor: http://127.0.0.1:${webPort}`)
@@ -137,3 +171,11 @@ process.once('SIGINT', () => {
 process.once('SIGTERM', () => {
   void stop()
 })
+
+process.once('SIGHUP', () => {
+  void stop()
+})
+if (process.platform === 'win32')
+  process.once('SIGBREAK', () => {
+    void stop()
+  })

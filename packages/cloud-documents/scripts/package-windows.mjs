@@ -58,7 +58,7 @@ await mkdir(join(output, 'runtime'))
 await cp(join(runtime, 'node.exe'), join(output, 'runtime/node.exe'))
 await cp(join(runtime, 'LICENSE'), join(output, 'runtime/LICENSE'))
 for (const filename of ['LICENSE', 'NOTICE']) await cp(join(root, filename), join(output, filename))
-for (const filename of ['local.mjs', 'setup.mjs']) {
+for (const filename of ['local.mjs', 'local-recovery.mjs', 'setup.mjs']) {
   const target = join(output, 'packages/cloud-documents/scripts', filename)
   await mkdir(dirname(target), { recursive: true })
   await cp(join(root, 'packages/cloud-documents/scripts', filename), target)

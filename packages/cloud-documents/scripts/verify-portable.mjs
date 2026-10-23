@@ -94,8 +94,42 @@ try {
   external.stdout.resume()
   external.stderr.resume()
   assert.equal((await once(external, 'exit'))[0], 0)
+  // Simulate closing/killing a console without a graceful shutdown, then use
+  // the same explicit recovery path exposed by Repair-and-start.cmd.
+  const killed = once(processHandle, 'exit')
+  processHandle.kill('SIGKILL')
+  await killed
+  await new Promise((done) => setTimeout(done, 200))
+  processHandle = spawn(
+    executable,
+    ['packages/cloud-documents/scripts/local.mjs', '--recover-lock'],
+    {
+      cwd: root,
+      env: {
+        ...process.env,
+        GENOFFICE_LOCAL_WEB_PORT: String(webPort),
+        GENOFFICE_LOCAL_API_PORT: String(apiPort),
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: false,
+    },
+  )
+  ready = false
+  processHandle.stdout.on('data', (data) => {
+    if (String(data).includes('Mobile editor:')) ready = true
+  })
+  processHandle.stderr.resume()
+  const recoveryDeadline = Date.now() + 20000
+  while (!ready) {
+    assert.equal(processHandle.exitCode, null, 'Recovery exited before readiness.')
+    assert.ok(Date.now() < recoveryDeadline, 'Recovery timed out.')
+    await new Promise((done) => setTimeout(done, 50))
+  }
+  assert.equal(await readFile(join(root, '.env.cloud.local'), 'utf8'), settings)
+  const recovered = await (await fetch(`${api}/v1/documents/${document.id}`, { headers })).json()
+  assert.equal(recovered.document.content, '# Portable test\n')
   console.log(
-    'PASS portable startup, bundled dependencies, private setup, authentication, document write/read and external helper.',
+    'PASS portable startup, authentication, document write/read, external helper and forced-exit recovery preserving keys/documents.',
   )
 } finally {
   if (processHandle && processHandle.exitCode === null) {
