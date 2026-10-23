@@ -1,0 +1,13 @@
+# Private inputs/results never belong here; runtime also requires external paths.
+*.hwp
+*.hwpx
+*.pdf
+*.svg
+*.png
+*.jpg
+*.bmp
+*.json
+*.log
+__pycache__/
+results/
+profile/
