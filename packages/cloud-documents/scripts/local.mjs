@@ -3,7 +3,7 @@ import { createReadStream } from 'node:fs'
 import { access, realpath, stat } from 'node:fs/promises'
 import { resolve, dirname, extname, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { loadEnvFile } from 'node:process'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -113,6 +113,15 @@ console.log(
 console.log(
   'Loopback only. Keep this process running; Ctrl+C stops both services. Never share the settings file.',
 )
+if (process.argv.includes('--open') && process.platform === 'win32') {
+  const browser = spawn(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-Command', `Start-Process 'http://127.0.0.1:${webPort}'`],
+    { shell: false, windowsHide: true, stdio: 'ignore' },
+  )
+  browser.on('error', () => console.log('Open the mobile editor address above in your browser.'))
+  browser.unref()
+}
 let stopping = false
 const stop = async () => {
   if (stopping) return
