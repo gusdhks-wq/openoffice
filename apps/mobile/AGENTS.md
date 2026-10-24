@@ -31,10 +31,13 @@ Run `npm run build:mobile`, `npm run test -w @genoffice/mobile` and repository
 checks. Physical-device IME, file sharing and OS termination need separate
 verification; browser viewport emulation is insufficient.
 
-The experimental HWP workspace is a separate binary-original + guarded-command
-journal, not a LocalDocument or Google source document. Reuse the pinned desktop
-WASM/plugin without changing either. Never route a HWP plain-text projection into
-the text/Docs sync paths. Edited HWP/HWPX export stays unavailable until desktop
-preservation steps and native-format round-trip checks are implemented. Recovery
-backups are explicitly .ieum-hwp.json files, not native-format exports. See
-`docs/plans/mobile-hwp.md` for the shared operation contract and remaining gates.
+The HWP editor embeds the same pinned offline studio as the desktop and stores
+immutable original bytes plus separately verified edited bytes. Legacy guarded
+command journals are migrated on open; backup v2 also retains the edited snapshot.
+Never route a HWP plain-text projection into source/Google Docs sync. Native export
+must pass password, container, desktop preservation, engine reopen and document
+fence checks. The desktop helper sources and engine stay unchanged: the build
+adapts only the supported Node primitives to browser implementations. Keep the
+original PC preservation tests running against that adapter. See
+`docs/plans/mobile-hwp.md` for implementation boundaries and remaining device,
+Hangul compatibility and structured AI/binary Drive integration checks.

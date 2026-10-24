@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
+import { createRequire } from 'node:module'
+import { resolve, relative } from 'node:path'
 import react from '@vitejs/plugin-react'
+import { hwpBrowserPreservation } from './scripts/hwp-browser'
 import { defineConfig, type Plugin } from 'vite'
 
 /** Cache the complete built application so a browser launch can also work offline. */
@@ -21,10 +23,26 @@ function offlineShell(): Plugin {
         '@capacitor/share',
         'tslib',
         '@rhwp/core',
+        '@rhwp/editor',
+        '@noble/hashes',
+        'buffer',
+        'base64-js',
+        'ieee754',
+        'pako',
+        'cfb',
+        'crc-32',
+        'adler-32',
+        'canvaskit-wasm',
       ]
       const notices = runtime
         .map((name) => {
-          const directory = resolve(import.meta.dirname, '../../node_modules', name)
+          const require = createRequire(resolve(import.meta.dirname, 'package.json'))
+          const directory = resolve(
+            require.resolve(
+              name === '@noble/hashes' ? name + '/legacy.js' : name + '/package.json',
+            ),
+            '..',
+          )
           const metadata = JSON.parse(readFileSync(resolve(directory, 'package.json'), 'utf8')) as {
             version: string
           }
@@ -37,6 +55,11 @@ function offlineShell(): Plugin {
               /* Try the next published license filename. */
             }
           }
+          if (!license && name === '@rhwp/editor')
+            license = readFileSync(
+              resolve(import.meta.dirname, '../hwp/public/studio/LICENSE-rhwp.txt'),
+              'utf8',
+            )
           if (!license) throw new Error(`Missing runtime license: ${name}`)
           return `${name}@${metadata.version}\n${license}`
         })
@@ -59,6 +82,21 @@ function offlineShell(): Plugin {
             'utf8',
           ),
       })
+      const studio = resolve(import.meta.dirname, '../hwp/public/studio')
+      const emitStudio = (directory: string) => {
+        for (const entry of readdirSync(directory, { withFileTypes: true })) {
+          const path = resolve(directory, entry.name)
+          if (entry.isDirectory()) emitStudio(path)
+          else if (!entry.name.startsWith('.') && !entry.name.endsWith('.d.ts')) {
+            this.emitFile({
+              type: 'asset',
+              fileName: 'studio/' + relative(studio, path).replaceAll('\\', '/'),
+              source: readFileSync(path),
+            })
+          }
+        }
+      }
+      emitStudio(studio)
       const files = Object.keys(bundle)
       const fingerprint = Object.values(bundle).map((item) =>
         item.type === 'chunk' ? item.code : String(item.source),
@@ -95,7 +133,7 @@ self.addEventListener('fetch', event => {
 export default defineConfig({
   root: 'src/renderer',
   build: { outDir: '../../dist', emptyOutDir: true },
-  plugins: [react(), offlineShell()],
+  plugins: [hwpBrowserPreservation(), react(), offlineShell()],
   base: './',
   server: { port: 5181, strictPort: true },
 })

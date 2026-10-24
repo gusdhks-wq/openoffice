@@ -1,8 +1,29 @@
 import type zh from './zh'
 export default {
-  hwpTitle: 'Espace HWP · expérimental',
+  hwpExitFullscreen: 'Quitter le plein écran',
+
+  hwpFullscreen: 'Plein écran',
+
+  hwpFitWidth: 'Largeur adaptée',
+
+  hwpZoomOut: 'Réduire',
+
+  hwpZoomIn: 'Agrandir',
+
+  hwpHelp: 'Fonctions et limites',
+
+  sourceWorkspace: 'Documents texte et connexions',
+
+  hwpSaveFailed:
+    'Vérification ou sauvegarde impossible. Gardez l’éditeur ouvert et réessayez. Original et dernière sauvegarde conservés.',
+
+  hwpSaveNative: 'Enregistrer une copie HWP/HWPX modifiée',
+
+  hwpNew: 'Nouveau document HWP',
+
+  hwpTitle: 'Éditeur HWP · expérimental',
   hwpScope:
-    'Ouvrez HWP/HWPX localement et remplacez le texte des paragraphes ou cellules. Les modifications et l’original sont conservés dans une sauvegarde réimportable. Export HWP/HWPX modifié, IA et synchronisation Drive indisponibles. Les polices peuvent modifier la pagination.',
+    'Saisissez dans HWP/HWPX et modifiez formats et tableaux. Sauvegarde locale après une pause, export en copie du format natif avec original conservé. Mots de passe et suivi des modifications non pris en charge. Compatibilité Hangul et saisie mobile à tester ; IA et Drive non connectés.',
   hwpOpen: 'Ouvrir HWP ou sauvegarde',
   hwpOriginal: 'Exporter l’original avant modification',
   hwpBackup: 'Exporter la sauvegarde de travail',
@@ -14,5 +35,5 @@ export default {
   hwpReplace: 'Remplacer et enregistrer localement',
   hwpUndo: 'Annuler la dernière modification',
   hwpFailed:
-    'Ouverture ou modification impossible. Vérifiez les doublons, le format et le stockage. Le travail existant est conservé.',
+    'Impossible d’ouvrir le document. Vérifiez le format, le mot de passe et le suivi des modifications. Originaux et copies enregistrées conservés.',
 } satisfies Record<keyof typeof zh, string>

@@ -30,6 +30,39 @@ function source(format = 'hwp') {
 }
 
 describe('HWP structured mobile workspaces', () => {
+  it('restores both edited native snapshots and legacy v1 command backups', () => {
+    const original = importHwp('sample.hwp', source())
+    const document = new HwpDocument(original.original)
+    let edited: Uint8Array
+    try {
+      document.replaceText(0, 0, 0, 'Original'.length, 'Snapshot')
+      edited = document.exportHwp()
+    } finally {
+      document.free()
+    }
+    const restored = importHwpBackup(exportHwpBackup({ ...original, edited }))
+    expect(restored.original).toEqual(original.original)
+    const engine = openHwpEngine(restored)
+    try {
+      expect(engine.plugin.readText()).toContain('Snapshot body')
+    } finally {
+      engine.close()
+    }
+    const legacy = JSON.parse(
+      new TextDecoder().decode(
+        exportHwpBackup(appendReplacement(original, replacement('Original body', 'Legacy body'))),
+      ),
+    )
+    legacy.version = 1
+    const recovered = importHwpBackup(new TextEncoder().encode(JSON.stringify(legacy)))
+    const old = openHwpEngine(recovered)
+    try {
+      expect(old.plugin.readText()).toContain('Legacy body')
+    } finally {
+      old.close()
+    }
+  })
+
   it.each(['hwp', 'hwpx'])('replays body and table edits from untouched %s bytes', (format) => {
     const bytes = source(format)
     const original = importHwp(`sample.${format}`, bytes)

@@ -145,107 +145,110 @@ export function App() {
         </select>
       </header>
 
-      <nav>
-        <button disabled={!canNavigate} onClick={createDocument}>
-          {t('newDocument')}
-        </button>
-        <button disabled={!canNavigate} onClick={() => importInput.current?.click()}>
-          {t('importFile')}
-        </button>
-        <button
-          disabled={!active}
-          onClick={() => {
-            if (active) void downloadDocument(active).catch(() => setError('exportFailed'))
-          }}
-        >
-          {t('exportFile')}
-        </button>
-        <input
-          ref={importInput}
-          type="file"
-          accept=".md,.markdown,.txt,text/plain,text/markdown"
-          hidden
-          onChange={(event) => {
-            const file = event.target.files?.[0]
-            event.target.value = ''
-            if (file && canNavigate) void importFile(file)
-          }}
-        />
-      </nav>
       <Suspense fallback={<p>{t('loading')}</p>}>
         <HwpPanel t={t} />
       </Suspense>
-      <DrivePanel
-        store={database}
-        active={active}
-        disabled={status !== 'saved' || composing || cloudBusy}
-        t={t}
-        onBusyChange={setDriveBusy}
-        onReload={reload}
-      />
-      <CloudPanel
-        store={database}
-        active={active}
-        disabled={status !== 'saved' || composing || driveBusy}
-        t={t}
-        onBusyChange={setCloudBusy}
-        onReload={reload}
-      />
-      {error && <p role="alert">{t(error)}</p>}
-      <div className="workspace">
-        <aside aria-label={t('documents')}>
-          {documents.map((doc) => (
-            <button
-              key={doc.id}
-              disabled={!canNavigate}
-              aria-current={active?.id === doc.id ? 'page' : undefined}
-              onClick={() => {
-                latest.current = doc
-                setActive(doc)
-                setError(null)
-              }}
-            >
-              {doc.name}
-            </button>
-          ))}
-        </aside>
-        <section>
-          {active ? (
-            <>
-              <h2>{active.name}</h2>
-              <textarea
-                aria-label={t('editor')}
-                value={active.text}
-                spellCheck={false}
-                disabled={driveBusy || cloudBusy}
-                onCompositionStart={() => setComposing(true)}
-                onCompositionEnd={() => setComposing(false)}
-                autoCapitalize="off"
-                onChange={(event) => {
-                  const doc = latest.current
-                  if (doc) persist(updateDocument(doc, event.target.value))
-                }}
-              />
-            </>
-          ) : (
-            <p>{t('empty')}</p>
-          )}
-          <footer>
-            <span role="status" aria-live="polite">
-              {t(status)}
-            </span>
-            {status === 'saveFailed' && (
+      <details className="source-workspace">
+        <summary>{t('sourceWorkspace')}</summary>
+        <nav>
+          <button disabled={!canNavigate} onClick={createDocument}>
+            {t('newDocument')}
+          </button>
+          <button disabled={!canNavigate} onClick={() => importInput.current?.click()}>
+            {t('importFile')}
+          </button>
+          <button
+            disabled={!active}
+            onClick={() => {
+              if (active) void downloadDocument(active).catch(() => setError('exportFailed'))
+            }}
+          >
+            {t('exportFile')}
+          </button>
+          <input
+            ref={importInput}
+            type="file"
+            accept=".md,.markdown,.txt,text/plain,text/markdown"
+            hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              event.target.value = ''
+              if (file && canNavigate) void importFile(file)
+            }}
+          />
+        </nav>
+        <DrivePanel
+          store={database}
+          active={active}
+          disabled={status !== 'saved' || composing || cloudBusy}
+          t={t}
+          onBusyChange={setDriveBusy}
+          onReload={reload}
+        />
+        <CloudPanel
+          store={database}
+          active={active}
+          disabled={status !== 'saved' || composing || driveBusy}
+          t={t}
+          onBusyChange={setCloudBusy}
+          onReload={reload}
+        />
+        {error && <p role="alert">{t(error)}</p>}
+        <div className="workspace">
+          <aside aria-label={t('documents')}>
+            {documents.map((doc) => (
               <button
+                key={doc.id}
+                disabled={!canNavigate}
+                aria-current={active?.id === doc.id ? 'page' : undefined}
                 onClick={() => {
-                  if (latest.current) persist(latest.current)
+                  latest.current = doc
+                  setActive(doc)
+                  setError(null)
                 }}
               >
-                {t('retry')}
+                {doc.name}
               </button>
+            ))}
+          </aside>
+          <section>
+            {active ? (
+              <>
+                <h2>{active.name}</h2>
+                <textarea
+                  aria-label={t('editor')}
+                  value={active.text}
+                  spellCheck={false}
+                  disabled={driveBusy || cloudBusy}
+                  onCompositionStart={() => setComposing(true)}
+                  onCompositionEnd={() => setComposing(false)}
+                  autoCapitalize="off"
+                  onChange={(event) => {
+                    const doc = latest.current
+                    if (doc) persist(updateDocument(doc, event.target.value))
+                  }}
+                />
+              </>
+            ) : (
+              <p>{t('empty')}</p>
             )}
-          </footer>
-        </section>
-      </div>
+            <footer>
+              <span role="status" aria-live="polite">
+                {t(status)}
+              </span>
+              {status === 'saveFailed' && (
+                <button
+                  onClick={() => {
+                    if (latest.current) persist(latest.current)
+                  }}
+                >
+                  {t('retry')}
+                </button>
+              )}
+            </footer>
+          </section>
+        </div>
+      </details>
     </main>
   )
 }

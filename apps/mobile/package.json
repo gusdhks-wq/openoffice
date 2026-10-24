@@ -12,18 +12,26 @@
     "test": "vitest run",
     "android:add": "cap add android && node --experimental-strip-types scripts/configure-android.ts",
     "android:sync": "npm run build && cap sync android && node --experimental-strip-types scripts/configure-android.ts",
-    "android:open": "cap open android"
+    "android:open": "cap open android",
+    "prebuild": "node scripts/prepare-hwp.mjs",
+    "predev": "node scripts/prepare-hwp.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.0.0",
     "@capacitor/filesystem": "^8.0.0",
     "@capacitor/share": "^8.0.0",
+    "@genoffice/cloud-documents": "*",
     "@genoffice/i18n": "*",
     "@genoffice/ui": "*",
+    "@noble/hashes": "^2.2.0",
+    "@rhwp/core": "file:../../vendor/rhwp-core",
+    "@rhwp/editor": "0.8.7",
+    "buffer": "^6.0.3",
+    "cfb": "^1.2.2",
+    "crc-32": "^1.2.2",
+    "pako": "^2.1.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "@genoffice/cloud-documents": "*",
-    "@rhwp/core": "file:../../vendor/rhwp-core"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@capacitor/android": "^8.0.0",

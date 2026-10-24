@@ -1,8 +1,28 @@
 import type zh from './zh'
 export default {
-  hwpTitle: 'HWP 工作區 · 實驗功能',
+  hwpExitFullscreen: '離開全螢幕',
+
+  hwpFullscreen: '全螢幕',
+
+  hwpFitWidth: '符合寬度',
+
+  hwpZoomOut: '縮小',
+
+  hwpZoomIn: '放大',
+
+  hwpHelp: '使用範圍與限制',
+
+  sourceWorkspace: '文字文件與連線設定',
+
+  hwpSaveFailed: '無法驗證或儲存修改。請保持編輯器開啟並重試。原件和上次儲存的副本已保留。',
+
+  hwpSaveNative: '儲存 HWP/HWPX 修改副本',
+
+  hwpNew: '新增 HWP 文件',
+
+  hwpTitle: 'HWP 文件編輯 · 實驗功能',
   hwpScope:
-    '在本機開啟 HWP/HWPX，取代內文或表格儲存格中的文字。修改與原檔一起儲存在工作區備份中，可用本應用程式重新匯入。暫不支援匯出修改後的 HWP/HWPX、AI 或雲端同步。字型可能影響分頁。',
+    '在 HWP/HWPX 文件中直接輸入並編輯格式和表格。暫停輸入後自動儲存到本機，可匯出原格式修改副本並保留原件。不支援密碼和修訂記錄。仍需驗證韓文輸入及 Hangul 相容性，尚未連接 AI 和雲端同步。',
   hwpOpen: '開啟 HWP 或工作區備份',
   hwpOriginal: '匯出原檔 · 修改前',
   hwpBackup: '匯出工作區備份',
@@ -13,5 +33,5 @@ export default {
   hwpReplacement: '新文字',
   hwpReplace: '取代並儲存到本機',
   hwpUndo: '復原上次修改',
-  hwpFailed: '無法開啟或修改。請檢查重複文字、檔案格式或儲存錯誤。現有工作已保留。',
+  hwpFailed: '無法開啟文件。請檢查格式、密碼保護和修訂記錄。原件及已儲存副本保持不變。',
 } satisfies Record<keyof typeof zh, string>

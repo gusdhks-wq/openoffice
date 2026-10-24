@@ -10,6 +10,7 @@ export interface HwpWorkspace {
   id: string
   name: string
   original: Uint8Array
+  edited?: Uint8Array
   operations: HwpReplacement[]
   revision: number
   updatedAt: number

@@ -1,8 +1,29 @@
 import type zh from './zh'
 export default {
-  hwpTitle: 'Ruang kerja HWP · percobaan',
+  hwpExitFullscreen: 'Keluar layar penuh',
+
+  hwpFullscreen: 'Layar penuh',
+
+  hwpFitWidth: 'Sesuaikan lebar',
+
+  hwpZoomOut: 'Perkecil',
+
+  hwpZoomIn: 'Perbesar',
+
+  hwpHelp: 'Cakupan dan batasan',
+
+  sourceWorkspace: 'Dokumen teks dan koneksi',
+
+  hwpSaveFailed:
+    'Verifikasi atau penyimpanan gagal. Biarkan editor terbuka dan coba lagi. Berkas asli serta simpanan terakhir tetap ada.',
+
+  hwpSaveNative: 'Simpan salinan HWP/HWPX yang disunting',
+
+  hwpNew: 'Dokumen HWP baru',
+
+  hwpTitle: 'Editor dokumen HWP · percobaan',
   hwpScope:
-    'Buka HWP/HWPX di perangkat dan ganti teks paragraf atau sel tabel. Perubahan dan berkas asli disimpan dalam cadangan yang dapat diimpor kembali. Ekspor HWP/HWPX hasil suntingan, AI, dan sinkronisasi Drive belum tersedia. Font dapat mengubah tata halaman.',
+    'Ketik langsung pada HWP/HWPX dan sunting format serta tabel. Simpan lokal setelah jeda dan ekspor salinan format asli dengan tetap menyimpan berkas asli. Sandi dan lacak perubahan belum didukung. Kompatibilitas Hangul dan keyboard ponsel perlu diuji; AI dan Drive belum tersambung.',
   hwpOpen: 'Buka HWP atau cadangan kerja',
   hwpOriginal: 'Ekspor berkas asli sebelum suntingan',
   hwpBackup: 'Ekspor cadangan kerja',
@@ -14,5 +35,5 @@ export default {
   hwpReplace: 'Ganti dan simpan di perangkat',
   hwpUndo: 'Batalkan suntingan terakhir',
   hwpFailed:
-    'Tidak dapat membuka atau menyunting. Periksa teks berulang, format, dan penyimpanan. Pekerjaan sebelumnya tetap tersimpan.',
+    'Dokumen tidak dapat dibuka. Periksa format, sandi, dan lacak perubahan. Berkas asli dan salinan tersimpan tetap ada.',
 } satisfies Record<keyof typeof zh, string>

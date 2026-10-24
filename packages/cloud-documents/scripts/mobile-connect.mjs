@@ -55,7 +55,7 @@ export function makeMobileGateway({
     const api = pair || /^\/(?:v1(?:\/|$)|mcp(?:\/|$)|health$)/.test(url.pathname)
     const asset =
       url.pathname === '/' ||
-      /^\/(?:index\.html|sw\.js|LICENSE\.txt|NOTICE\.txt|THIRD-PARTY-NOTICES\.txt|assets\/[A-Za-z0-9_.-]+)$/.test(
+      /^\/(?:index\.html|sw\.js|LICENSE\.txt|NOTICE\.txt|THIRD-PARTY-NOTICES\.txt|assets\/[A-Za-z0-9_.-]+|studio\/(?:(?:assets|icons|images)\/)?[A-Za-z0-9_-][A-Za-z0-9_.-]*)$/.test(
         url.pathname,
       )
     if (!api && !asset) {

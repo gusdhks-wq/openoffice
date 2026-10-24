@@ -125,6 +125,7 @@ try {
     })
   })
   await page.goto(origin)
+  await page.getByText('Text documents and connections', { exact: true }).click()
   await page.getByRole('button', { name: 'New document', exact: true }).click()
   await page.locator('textarea').fill('phone source 😀\n')
   const panel = page.locator('.drive-panel')

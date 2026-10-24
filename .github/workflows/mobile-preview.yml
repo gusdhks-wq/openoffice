@@ -6,6 +6,8 @@ on:
     paths:
       - .github/workflows/mobile-preview.yml
       - apps/mobile/**
+      - apps/hwp/**
+      - vendor/rhwp-core/**
       - packages/cloud-documents/**
       - package.json
       - package-lock.json
