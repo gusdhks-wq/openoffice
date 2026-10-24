@@ -1,0 +1,128 @@
+name: Mobile preview packages
+
+on:
+  push:
+    branches: [feat/mobile-offline-prototype]
+    paths:
+      - .github/workflows/mobile-preview.yml
+      - apps/mobile/**
+      - apps/hwp/**
+      - vendor/rhwp-core/**
+      - packages/cloud-documents/**
+      - package.json
+      - package-lock.json
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/mobile-preview.yml
+      - apps/mobile/**
+      - apps/hwp/**
+      - vendor/rhwp-core/**
+      - packages/cloud-documents/**
+      - package.json
+      - package-lock.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows portable preview
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.23.4
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run build:cloud
+      - name: Verify actual browser consent and PKCE
+        run: node packages/cloud-documents/scripts/verify-oauth-browser.mjs
+      - run: npm run build:mobile
+      - name: Verify offline HWP and HWPX browser workspaces
+        run: node apps/mobile/scripts/verify-hwp-browser.mjs
+      - name: Verify Google document browser UI with synthetic Google endpoints
+        run: node apps/mobile/scripts/verify-drive-browser.mjs
+      - run: npm run test -w @genoffice/mobile
+      - name: Download and verify bundled runtime
+        run: python packages/cloud-documents/scripts/download-windows-runtime.py "${{ runner.temp }}/ieum-node"
+      - name: Download and verify mobile HTTPS connector
+        run: python packages/cloud-documents/scripts/download-mobile-connector.py windows "${{ runner.temp }}/ieum-cloudflared"
+      - name: Assemble portable folder
+        run: node packages/cloud-documents/scripts/package-windows.mjs "${{ runner.temp }}/ieum-node/node-v22.23.4-win-x64" "${{ runner.temp }}/IeumOffice-Mobile-PC" "${{ runner.temp }}/ieum-cloudflared"
+      - name: Smoke test the portable folder
+        run: node packages/cloud-documents/scripts/verify-portable.mjs "${{ runner.temp }}/IeumOffice-Mobile-PC"
+      - name: Verify live HTTPS and OAuth with synthetic documents
+        run: node packages/cloud-documents/scripts/verify-mobile-link.mjs "${{ runner.temp }}/IeumOffice-Mobile-PC"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: IeumOffice-Mobile-PC-Windows-x64-preview
+          path: ${{ runner.temp }}/IeumOffice-Mobile-PC/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Assemble mobile connection add-on
+        shell: pwsh
+        run: |
+          $target = "${{ runner.temp }}/IeumOffice-Mobile-Connection"
+          New-Item -ItemType Directory -Force "$target/runtime", "$target/packages/cloud-documents/scripts", "$target/apps/mobile" | Out-Null
+          Copy-Item "${{ runner.temp }}/ieum-cloudflared/*" "$target/runtime/"
+          Copy-Item packages/cloud-documents/portable/Mobile-connect.cmd "$target/"
+          Copy-Item packages/cloud-documents/portable/MOBILE.ko.txt "$target/"
+          Copy-Item packages/cloud-documents/portable/GOOGLE-DRIVE.ko.txt "$target/"
+          foreach ($name in @('mobile-connect.mjs','remote-oauth.mjs','remote-strings.mjs','mobile-pairing.mjs')) {
+            Copy-Item "packages/cloud-documents/scripts/$name" "$target/packages/cloud-documents/scripts/"
+          }
+          Copy-Item -Recurse apps/mobile/dist "$target/apps/mobile/"
+          Copy-Item LICENSE, NOTICE "$target/"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: IeumOffice-Mobile-Connection-Addon
+          path: ${{ runner.temp }}/IeumOffice-Mobile-Connection/
+          if-no-files-found: error
+          retention-days: 14
+  android:
+    name: Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.23.4
+          cache: npm
+      - name: Select preinstalled Java 21
+        run: |
+          test -d "$JAVA_HOME_21_X64"
+          echo "JAVA_HOME=$JAVA_HOME_21_X64" >> "$GITHUB_ENV"
+          echo "$JAVA_HOME_21_X64/bin" >> "$GITHUB_PATH"
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run test -w @genoffice/cloud-documents
+      - run: npm run build:mobile
+      - run: npm run android:add -w @genoffice/mobile
+      - run: npm run android:sync -w @genoffice/mobile
+      - name: Build debug APK
+        working-directory: apps/mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+      - name: Collect test package
+        run: |
+          mkdir -p /tmp/ieum-apk
+          cp apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk /tmp/ieum-apk/IeumOffice-Mobile-Android-preview.apk
+          cp LICENSE NOTICE /tmp/ieum-apk/
+          cp packages/cloud-documents/portable/ANDROID.ko.txt /tmp/ieum-apk/
+          python apps/mobile/scripts/write-google-setup.py /tmp/ieum-apk/IeumOffice-Mobile-Android-preview.apk packages/cloud-documents/portable/GOOGLE-DRIVE.ko.txt /tmp/ieum-apk/GOOGLE-OAUTH-SETUP.ko.txt
+          sha256sum /tmp/ieum-apk/*.apk > /tmp/ieum-apk/SHA256SUMS.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: IeumOffice-Mobile-Android-preview
+          path: /tmp/ieum-apk/
+          if-no-files-found: error
+          retention-days: 14

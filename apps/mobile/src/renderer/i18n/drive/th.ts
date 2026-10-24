@@ -1,0 +1,32 @@
+import type zh from './zh'
+export default {
+  driveCancelPending: 'ยกเลิกการสร้างที่รออยู่ (เก็บไฟล์ Drive ไว้)',
+  driveLiveMode: 'เอกสาร Google ที่แก้ไขได้',
+  driveBackupMode: 'ข้อมูลสำรองไฟล์แบบเดิม',
+  driveLiveNotice:
+    'ซิงก์เอกสาร Google แบบข้อความล้วนโดยไม่ใช้ PC ใน ChatGPT ให้ใช้ Google Drive แก้ไขเอกสารเดียวกัน ไม่แก้ไขตาราง เอกสารที่มีรูปแบบ หรือหลายแท็บที่นี่',
+  driveGoogleLink: 'เปิดเอกสาร Google',
+  driveLiveConflict: 'ทั้งสองสำเนามีการเปลี่ยนแปลง เก็บฉบับร่างไว้แล้ว โปรดเปิดสำเนา Drive แยกกัน',
+  driveUnsupported: 'ไม่รองรับเนื้อหาหรือรูปแบบนี้ เก็บต้นฉบับและฉบับร่างบนเครื่องไว้แล้ว',
+  driveUncertain: 'ยังไม่ทราบผลจาก Google ลองซิงก์อีกครั้งเพื่อค้นหาไฟล์เดิม อย่าสร้างสำเนาใหม่',
+  driveSetupHint:
+    'เปิด Drive API และ Docs API ใน Google Cloud ลงทะเบียนแพ็กเกจและใบรับรอง Android หรือไคลเอนต์ OAuth เว็บสำหรับต้นทางนี้ ไม่ต้องใช้ข้อมูลลับไคลเอนต์',
+  driveWebClientId: 'รหัสไคลเอนต์ OAuth เว็บ (สาธารณะ)',
+  driveSaveSetup: 'บันทึกการเข้าสู่ระบบ',
+  driveConnect: 'เชื่อมต่อ Drive',
+  driveDisconnect: 'ยกเลิกการเชื่อมต่อ Drive',
+  driveSync: 'ซิงค์เอกสารนี้',
+  driveRefresh: 'รีเฟรช',
+  driveRemoteFiles: 'รุ่นเอกสารใน Drive',
+  driveConnected: 'เชื่อมต่อ Drive แล้ว',
+  driveDisconnected: 'ยังไม่เชื่อมต่อ Drive',
+  driveBusy: 'กำลังซิงค์…',
+  driveSynced: 'ซิงค์เสร็จแล้ว',
+  driveConflict: 'มีหลายรุ่น โปรดเปิดแต่ละสาขาจากรายการ Drive',
+  driveFailed: 'การทำงานกับ Drive ล้มเหลว เอกสารในเครื่องยังอยู่',
+  driveSetup: 'ตั้งค่า Google OAuth ก่อน ดูคู่มือการตั้งค่าแอป',
+  driveAccountMismatch: 'เอกสารนี้เชื่อมกับบัญชี Drive อื่น โปรดเชื่อมต่อบัญชีนั้น',
+  drivePending: 'รออัปโหลดบนอุปกรณ์นี้',
+  driveOffline: 'ออฟไลน์ จะลองซิงค์เอกสารที่เชื่อมไว้เมื่อออนไลน์',
+  driveNotice: 'Drive เก็บการแก้ไขเป็นไฟล์ใหม่ ยังไม่เชื่อมต่อ AI บนคลาวด์',
+} satisfies Record<keyof typeof zh, string>

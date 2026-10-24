@@ -163,7 +163,7 @@ app's own features:
   much of your subscription as it asks for, including whole documents and
   page images.
 
-## Google Drive
+## Google Drive (desktop)
 
 Connecting Google Drive is optional and starts only when you press **Connect
 Google Drive**. The app asks Google for access to your whole Drive, so that it
@@ -190,6 +190,25 @@ there, as everything else you send to the AI does.
 
 You can remove the app's access at any time with **Disconnect**, or from your
 Google Account's security settings.
+
+### Mobile preview
+
+The separate mobile preview connects only after you press **Connect Drive** and
+uses `drive.file`, limited to files created or explicitly authorized for this
+Google Cloud app. File names, source text, operation markers and account identifiers
+travel directly between the mobile app and Google's Drive/Docs APIs. Android
+uses Google's system authorization UI; the web preview loads Google's login SDK
+after the connection action. Access tokens stay in memory. A public web OAuth
+client ID may be retained in localStorage; no client secret, password or refresh
+token is stored by the mobile code.
+
+The default source-document mode updates a native Google document with a revision
+check. The legacy mode uploads separate immutable text-file snapshots. Local drafts,
+pending operations and account-bound file links are kept in IndexedDB. The app
+does not automatically delete historical Drive files or send document text to an
+AI provider. An independently connected ChatGPT Google Drive plugin can read or
+edit a document when you request it, under that plugin's account and permissions;
+the mobile app neither receives that plugin's credentials nor runs its model.
 
 ## Whether your content is used for AI training
 

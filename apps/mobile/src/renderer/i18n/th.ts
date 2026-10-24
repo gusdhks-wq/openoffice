@@ -1,0 +1,27 @@
+import hwp from './hwp/th'
+import cloud from './cloud/th'
+import drive from './drive/th'
+import type zh from './zh'
+export default {
+  ...hwp,
+  ...cloud,
+  ...drive,
+  prototype: 'แอปมือถือต้นแบบ',
+  newDocument: 'เอกสารใหม่',
+  importFile: 'นำเข้า',
+  exportFile: 'ส่งออก',
+  documents: 'เอกสาร',
+  editor: 'เนื้อหาเอกสาร',
+  saved: 'บันทึกในอุปกรณ์นี้แล้ว',
+  saving: 'กำลังบันทึก…',
+  saveFailed: 'ยังไม่บันทึก โปรดส่งออกสำเนาก่อนออก',
+  retry: 'ลองบันทึกอีกครั้ง',
+  loading: 'กำลังโหลด…',
+  openFailed: 'เปิดที่เก็บข้อมูลในเครื่องไม่ได้ โปรดโหลดหน้าใหม่',
+  importFailed: 'เลือกไฟล์ UTF-8 .md หรือ .txt ขนาดไม่เกิน 2 MB',
+  exportFailed: 'ส่งออกไฟล์ไม่ได้',
+  localOnly: 'เอกสารจะบันทึกในอุปกรณ์นี้ก่อน การเชื่อมต่อภายนอกเป็นตัวเลือก',
+  untitled: 'ไม่มีชื่อ',
+  empty: 'สร้างหรือนำเข้าเอกสารเพื่อเริ่มต้น',
+  language: 'ภาษา',
+} satisfies Record<keyof typeof zh, string>

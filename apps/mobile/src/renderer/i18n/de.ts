@@ -1,0 +1,28 @@
+import hwp from './hwp/de'
+import cloud from './cloud/de'
+import drive from './drive/de'
+import type zh from './zh'
+export default {
+  ...hwp,
+  ...cloud,
+  ...drive,
+  prototype: 'Mobiler Prototyp',
+  newDocument: 'Neues Dokument',
+  importFile: 'Importieren',
+  exportFile: 'Exportieren',
+  documents: 'Dokumente',
+  editor: 'Dokumentinhalt',
+  saved: 'Auf diesem Gerät gespeichert',
+  saving: 'Speichern…',
+  saveFailed: 'Speichern fehlgeschlagen. Vor dem Verlassen eine Kopie exportieren.',
+  retry: 'Erneut speichern',
+  loading: 'Laden…',
+  openFailed: 'Lokaler Speicher nicht verfügbar. Seite neu laden.',
+  importFailed: 'UTF-8-Datei (.md oder .txt) unter 2 MB auswählen.',
+  exportFailed: 'Datei konnte nicht exportiert werden.',
+  localOnly:
+    'Dokumente werden zuerst auf diesem Gerät gespeichert. Externe Verbindungen sind optional.',
+  untitled: 'Unbenannt',
+  empty: 'Zum Start ein Dokument erstellen oder importieren.',
+  language: 'Sprache',
+} satisfies Record<keyof typeof zh, string>

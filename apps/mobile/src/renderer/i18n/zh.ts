@@ -1,0 +1,26 @@
+import hwp from './hwp/zh'
+import cloud from './cloud/zh'
+import drive from './drive/zh'
+export default {
+  ...hwp,
+  ...cloud,
+  ...drive,
+  prototype: '移动版原型',
+  newDocument: '新建文档',
+  importFile: '导入',
+  exportFile: '导出',
+  documents: '文档',
+  editor: '文档内容',
+  saved: '已保存到此设备',
+  saving: '正在保存…',
+  saveFailed: '保存失败。离开前请导出副本。',
+  retry: '重试保存',
+  loading: '正在加载…',
+  openFailed: '无法打开本地存储，请刷新重试。',
+  importFailed: '请选择小于 2 MB 的 UTF-8 .md 或 .txt 文件。',
+  exportFailed: '无法导出文件。',
+  localOnly: '文档先保存在本机，外部连接为可选项。',
+  untitled: '无标题',
+  empty: '创建或导入文档以开始。',
+  language: '语言',
+}

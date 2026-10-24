@@ -565,3 +565,129 @@
 - **보이는 것.** 다음 이어하기 제안의 시작 전 확인이 예전 페이지 번호를 미리 고른다.
 - **왜 중요한가.** 사람이 확인 창에서 고치지 않으면 다른 페이지를 보낸다(보내기 전에 확인 창이 보인다).
 - **지금 못 푸는 이유.** 기억해 둔 페이지 번호(`job-pages.ts`)는 번호만 담아 페이지 지문으로 옮길 수 없다. 저장 때도 같은 한계가 이미 있었다.
+
+## Mobile prototype verification limits (2026-10-23)
+
+- **Conditions.** This cloud checkout has Java 21 but no Android SDK or attached
+  physical phone. Capacitor project generation and synchronization succeed;
+  native APK compilation, file sharing and keyboard/lifecycle behavior remain
+  unverified. A browser at a mobile viewport does not replace device testing.
+- **Impact.** The first milestone is a local source-editor prototype, not a
+  store-ready mobile release. Drive synchronization and cloud AI are not yet
+  implemented; no account or paid service has been provisioned.
+- **Repository tests.** `npm test` stops in the unchanged `electron-utils`
+  workspace: four suites cannot load Electron and five remote-fetch assertions
+  fail in this environment (6 failed files, 24 passed; 5 failed tests, 305 passed).
+  The same workspace on an unmodified HEAD archive with the installed dependency
+  tree produces the same failing file/test counts. A direct Electron binary
+  installation attempt also fails with `TypeError: fetch failed`.
+- **Verified separately.** Whole-repository typecheck, lint (existing warnings
+  only), mobile production build and 11 mobile unit tests pass. The unchanged
+  desktop Markdown suite also passes all 1,366 tests when its Git subprocesses
+  are allowed; the sandboxed run failed on `spawnSync git EPERM`. Browser checks
+  exercise Korean source editing, reload recovery, offline restart/edit/recovery,
+  original BOM/CRLF export and concurrent-tab conflict rejection. No real AI
+  provider or subscription was invoked by the mobile implementation or checks.
+- **Next step.** Build and exercise a debug APK on a physical Android phone, then
+  proceed with portable rich-editor adapters and Drive synchronization described
+  in `docs/plans/mobile-cloud.md`.
+
+## Drive synchronization prototype requires live setup (2026-10-23)
+
+- **Implemented.** Mobile authorization uses browser Google Identity Services or
+  an Android Google Play services authorization bridge. Access tokens stay in
+  memory. Account-bound pending uploads persist before transfer, retries reuse
+  reserved Drive file IDs, and every uploaded change creates a new file. The
+  app never updates or deletes historical Drive files. Concurrent branches are
+  retained, and downloads cannot replace a draft edited during the transfer.
+- **Verified.** Unit tests exercise interrupted transfers, account changes,
+  concurrent edits, source bytes, streamed size limits, token scopes and native
+  project patching. A Chromium mobile-viewport scenario uses mocked Google
+  endpoints to verify connection, explicit first upload, IME composition gating,
+  offline reconnect, interrupted-upload recovery after reload, duplicate-free
+  retries, no stored access token and disconnect. No live Google login was used.
+- **Pending.** The user has no Google Cloud project/OAuth client yet. The setup
+  guide is in `apps/mobile/README.md#drive-setup`. Android Java compilation and
+  system authorization need an Android SDK, configured package/signing SHA-1 and
+  a physical device with Google Play services. Cross-client file visibility in
+  one Google project still needs live verification.
+- **Limits.** This uses app-created UTF-8 text/Markdown files with `drive.file`
+  access, foreground synchronization of the current linked document and separate
+  immutable version files in My Drive. It does not yet provide arbitrary-file
+  selection, automatic merging, history pruning, canonical-file overwrite,
+  native background execution or cloud AI. These limits are visible in the
+  mobile setup guide and do not silently widen Drive permissions.
+
+## Optional external-agent document service (2026-10-23)
+
+- **Implemented.** `packages/cloud-documents` supplies persistent UTF-8 Markdown/text documents, authenticated REST and six MCP tools. It never runs a model or calls the OpenAI API. Separate owner/agent keys, explicit document sharing (including retained history), revision checks, atomic history and idempotent writes protect local drafts and retries. Mobile keys remain in memory. Workspace IDs bind pending uploads to one persistent workspace.
+- **Verified.** Mobile tests and store/browser/real HTTP-MCP integration tests pass. A Chromium mobile viewport connected to a temporary real server and MCP SDK client: private upload, explicit sharing, external edit and mobile retrieval, offline concurrent-edit conflict, private copy, agent-created document, access revocation, no saved keys and no page errors. These checks use synthetic credentials and no AI subscription.
+- **Pending.** No public HTTPS host, published plugin, real hosted Codex session, production secret provisioning, native Android build or Google login has been tested. The setup and client compatibility distinctions are documented in `packages/cloud-documents/README.md`; local Docker image builds, Caddy/Compose configuration and non-root container restart persistence are verified; public DNS/TLS provisioning remains unverified. CLI MCP success does not establish hosted Codex/plugin availability.
+- **Limits.** Single server process/data volume; 256 documents, 128 retained versions per document, 4096 idempotency receipts and 64 MiB total storage. No automatic merge, multi-user accounts, model runner, background mobile sync or history pruning. Google Drive snapshots remain a separate optional connection.
+
+## PC-first document-service launcher (2026-10-23)
+
+- **Implemented.** `npm run start:local` starts the built mobile assets and document service on two loopback-only ports. First launch generates private settings without replacing existing files; shutdown releases the store lock. A Korean guide covers Windows-compatible commands, private key entry, local MCP and optional Android USB forwarding. No hosting account or public tunnel is created.
+- **Verified.** Isolated temporary settings/data exercised static-file boundaries, authentication and exact CORS origins, document creation, graceful stop, unchanged settings and preserved document after restart. Both Docker targets build; Compose and Caddy validate; a non-root container preserves a document across restart. Synthetic keys only, no user documents or AI calls.
+- **Pending.** The user selected their own PC first. Their actual PC/Android device has not been accessed; USB forwarding is documented but not tested on a device. Cloud Codex cannot reach a PC loopback address without a separately configured reachable endpoint and supported runtime authentication.
+
+## Downloadable mobile preview packages (2026-10-23)
+
+- **Implemented.** `Mobile preview packages` produces Windows x64 portable files and an Android debug APK as 14-day Actions artifacts, without creating a release or using production signing credentials. The Windows folder bundles a SHA-256-verified official Node 22.23.4 runtime, explicit runtime dependency closure and license notices; `Start.cmd` starts the editor/server and opens the browser. No user data or generated keys are packaged.
+- **Verified.** Both jobs succeeded in run 39963541968 at commit 26d14e6807ed5cd9c0c69f7a80809423d2735265. A real Windows runner passed all 42 mobile tests and executed the portable runtime against isolated settings to verify startup, authentication, document write/read and the HTTP helper. Android Java 21/SDK 36 compiled the native Drive bridge and debug APK. The APK contains the editor, manifest, bytecode and web license notices. Cloud tests pass (20).
+- **Fix.** Windows cannot open/fsync a directory with Node's POSIX-style API. The store now preserves file fsync and replacement while skipping directory fsync on Windows; POSIX behavior is preserved. Directory-entry power-loss durability and folder ACLs remain platform-specific.
+- **Pending.** Physical Windows desktop interaction and Android device behavior, Google login, public hosting and hosted Codex/plugin connection remain unverified. Installing these previews does not automatically connect the phone/PC or install tools in cloud Codex. Debug signing certificates can change between builds: export local documents before uninstalling an older test APK. See `docs/plans/mobile-preview-packages.md` for the user steps.
+
+## Portable startup failure and explicit lock recovery (2026-10-23)
+
+- **Reported.** A user screenshot shows the generic `Local startup failed` message after a prior successful start. The screenshot alone does not distinguish an occupied port, active/stale writer lock, invalid settings or storage failure. Do not claim the user's exact cause is established.
+- **Changed.** Startup now reports safe reason codes without keys or document text. SIGHUP/Windows SIGBREAK also request graceful shutdown. `Repair-and-start.cmd` explicitly checks both configured ports and the lock PID, refuses live/unknown locks and concurrent repairs, and moves only a confirmed dead writer's lock aside while preserving settings and database bytes. Normal Start does not silently remove locks.
+- **Verified.** Five recovery tests exercise dead/active/unknown locks, a recovery guard and occupied ports; all 25 cloud tests pass. The Windows portable smoke test in run 39966844464 (commit 1aa00469f0875b82b4b4ae45ccc58d3d9ed1f416) forcibly kills its temporary server, launches the explicit recovery path and verifies the same connection settings and saved document. The Windows job succeeded and uploaded artifact 12506453913. Existing mobile tests also pass on that runner (42).
+- **User step.** Close existing Start windows, extract the updated Windows package into the existing Start.cmd folder replacing shipped files, then run Repair-and-start.cmd. The package contains no generated connection settings or document folder, so those remain. If recovery refuses, request only the new reason code; do not tell the user to delete data or blindly remove the writer lock. Actual recovery on the user's PC is still pending.
+
+## Optional mobile HTTPS and ChatGPT OAuth connector (2026-10-23)
+
+- **Implemented.** A separate opt-in Mobile-connect.cmd starts a checksum-verified Cloudflare Quick Tunnel and fixed-target gateway around an already running PC service. The existing Android APK can use the temporary HTTPS origin with its owner key; no reinstall is needed. The add-on contains no settings or documents and does not restart the existing server. The gateway permits native/same-origin requests, preserves backend ACLs and excludes private files and arbitrary targets.
+- **OAuth.** SDK authorization-code/PKCE endpoints with DCR support ChatGPT custom server setup. Redirects are restricted to documented ChatGPT callback paths. A browser-bound, five-attempt, three-minute PC approval code replaces password/key entry on the approval page. Access/rotating refresh tokens are in-memory, resource-bound and agent-only; sharing revocation remains authoritative. Anonymous calls can initialize/list tools but cannot access document data. Approval UI has all 21 languages.
+- **Verified.** Local cloud tests pass 33, including OAuth, PKCE/CSRF/resource/client/replay/expiry/revocation and real MCP edits behind the gateway; mobile tests pass 42. Both preview jobs in run 39972946682 succeeded at 46d08d0cbaac3929541b421b4a4504510d165bdb. The Windows test used a real HTTPS tunnel with synthetic data, Android Origin headers, owner access, private-file/auth denial, DCR + PC approval + PKCE, agent visibility and an external edit returned to the phone-side read. It closed the test connector afterward. No model/API call, OpenAI API key or real user document was used.
+- **Fix during verification.** The pinned cloudflared version accepts --output json, not --logformat json. Official binary help identified the startup failure; the corrected real-network run passed. Anonymous MCP payloads are capped at 32 KiB and the gateway has request/header timeouts.
+- **Pending/limits.** The user reported the custom MCP creation UI is available, but their plugin has not been installed or called. Physical Android behavior remains unverified. Quick Tunnel is temporary, uses Cloudflare TLS termination, needs a running PC and changes address after restart; it is not production hosting or a public plugin submission endpoint. Account/workspace write permissions still apply. OAuth state and connections expire on connector exit. No tunnel was opened to the user's PC by the agent; user activation is still required.
+
+## Browser consent POST denied after PC approval (2026-10-24)
+
+- **Reported.** The user reached `/approve` after entering the PC code and received a blank HTTP 403. An earlier `invalid_target` separately indicated a different OAuth resource; the screenshot of `/approve` is not evidence that the MCP URL is wrong.
+- **Reproduced.** Real Chromium submitted `Origin: null` because the approval response used `Referrer-Policy: no-referrer`; strict same-origin approval correctly rejected it. Prior HTTP-only smoke tests supplied Origin manually and missed browser behavior.
+- **Fixed.** Use `same-origin`, retaining the consent POST Origin while withholding referrers from the external callback. CSP form-action now also permits the validated, canonical ChatGPT callback, because Chromium applies it to the successful form redirect. Cookie, Origin, PC code, expiry, PKCE and resource checks remain required.
+- **Verified locally.** A new real-Chromium check fails on the original header and passes approval, callback and token exchange after both fixes. All requests are intercepted and served by an isolated loopback OAuth handler with synthetic credentials; there is no external account login or model call. The Windows packaging workflow now runs this browser check before producing artifacts. Actual user connection still needs verification.
+
+## User-confirmed Windows, Android and ChatGPT round trip (2026-10-24)
+
+- **Verified live.** The user completed custom plugin OAuth after the browser consent fix. The connected tools listed the explicitly shared `제목 없음.md`; ChatGPT read its base revision and committed `test complete` with a new operation ID. The user confirmed that content in the Android app.
+- **Reverse direction.** At the agent's request the user saved `mobile test` from Android. A fresh tool read returned exactly that content with a later server revision. Both directions have live evidence; no real document content beyond these user-authorized test strings was needed.
+- **Limits.** This is shared storage and foreground synchronization through a running Windows PC and temporary tunnel. It does not establish offline office-format fidelity, permanent OAuth connections, app-hosted AI, physical-device termination durability or PC-independent operation. Keep both PC processes running. Next work should improve connection usability or the mobile editor without implying a permanent backend already exists.
+
+## Phone pairing and explicit reconnection after URL changes (2026-10-24)
+
+- **Scope selected.** The user chose connection usability first, mobile editing second and PC-independent operation third. No hosting, billing, Google OAuth or model API provisioning is part of this step.
+- **Implemented.** The optional gateway mints a one-use, three-minute phone code, limited to five attempts. P + Enter in the PC console replaces only the code; existing phone/OAuth sessions remain valid. A successful pairing returns an independent, hashed-in-memory eight-hour owner REST session, never the private owner key. Sessions are bounded to eight, revocable and invalidated on gateway exit; they cannot authenticate MCP or the loopback backend.
+- **Client.** Updated Android/browser clients use a phone code by default and retain manual owner-key mode. The browser fills its current public server address; native clients retain only the last successful address. Keys, codes and tokens remain in memory. Phone address input also accepts a copied MCP suffix. Explicit same-workspace reconnection changes a local binding and queued target URL while retaining document bytes, operation ID and base revision; conflicting changes still fail.
+- **Verified locally.** All 44 mobile tests and 37 cloud tests pass, covering interrupted committed writes at a new URL without duplicates, stale drafts, wrong-workspace denial, code reuse/expiry/attempt/session limits and REST/MCP separation. Actual Chromium at a phone viewport connected through the built UI using only its code, opened a document, verified no credentials in localStorage and disconnected. Windows packaging adds the new script and built browser assets to the existing non-destructive add-on. The live HTTPS Windows test now also exercises real-browser phone pairing and saving before OAuth/MCP checks.
+- **Limits.** Actual user phone code pairing and the new APK are not yet verified. Existing debug APKs may have a different signing certificate; do not ask the user to uninstall an app with unexported drafts. The updated browser UI provides code pairing without uninstalling the existing app. Browser drafts remain origin-bound. Updating/restarting the tunnel changes the URL and requires one fresh ChatGPT connection; generating a new phone code afterward does not restart it.
+
+## Drive-centered PC-independent source documents (2026-10-24)
+
+- **Selected.** The user chose Drive-centered storage rather than an always-on TTT server. Existing Google Drive plugin authorization cannot be copied into the Android app. No Google Cloud project, OAuth client or actual app login has been configured.
+- **Implemented.** Separate native Google source-document mode, using the existing `drive.file` scope, keeps one Google document ID, polls the active foreground document, and uses explicit tab ranges plus requiredRevisionId for writes. Legacy snapshots are never patched/deleted. Plain source text projects into ordinary Google paragraphs; unsupported structure, styled text and suggestions are refused. The desktop codec is unchanged.
+- **Recovery.** Account-bound durable pending operations preserve captured text. Unknown creation results are looked up by operation marker and never blindly re-created; an explicit local cancellation preserves all Drive files. Lost writes are reconciled against the document body before any guarded retry. Simultaneous edits preserve the local draft, and opening the remote copy makes another local draft.
+- **Setup.** Web UI accepts only a public client ID; tokens remain in memory. Android keeps the Google system authorization bridge. The APK workflow emits a Korean setup file with the exact public debug SHA-1 and package. Drive API and Docs API must both be enabled in the user's project, with an Android OAuth client and test account. Temporary PC URLs do not provide permanent web hosting.
+- **Verification.** Official Google discovery confirms drive.file is accepted for Docs get/batchUpdate, requiredRevisionId rejects a stale revision, and range/location accept tabId. Stateful tests cover fixed-ID edits, external pulls, BOM/newline export, interrupted writes/creates across restart, unknown results, conflict copies, account changes, concurrent local edits and two-tab creation. Chromium with intercepted synthetic Google APIs completes public-ID setup, login callback, create/edit/pull and verifies no persisted token, without a PC document server. Real Google authorization and a user-device PC-off round trip remain pending.
+
+## Mobile HWP/HWPX workspaces still need native-format save and remote integration
+
+The Android/browser prototype now retains an immutable binary original plus guarded text-replacement commands, renders pages with the existing WASM, and persists/reopens independent local workspaces. Source-text and native Google Docs sync never receive these workspaces. A recovery backup can reopen in the mobile app; an original export is explicitly the unedited source. Edited HWP/HWPX export, direct canvas typing, structure-aware remote tools and binary Drive sync are not implemented. Desktop-only preservation steps cannot be skipped, and engine reopen success does not prove Hangul compatibility or full cell/object/page fidelity. The other worker's reported HWP trials and uncommitted XLSX changes are not merged here. Details and acceptance criteria: `docs/plans/mobile-hwp.md`.
+
+## Direct mobile HWP/HWPX editor and native save (2026-10-24)
+
+The mobile app now embeds the same pinned offline studio, supports direct input, selected-range formatting and table editing, and persists separately verified edited bytes beside immutable originals. Native copies retain the opened format. A build-only adapter compiles the unchanged desktop preservation helpers with browser Buffer, hash, bounded compression and CRC primitives; the original PC preservation regression suites also run against it. Password/unknown protection, tracked HWP, failed preservation, failed native reopen and changed document fences block save. Recovery backup v2 retains edited bytes and imports v1 journals. Source-text/Google Docs/TTT remain separate.
+
+Production Chromium verifies direct input, Korean composition through CDP IME, paragraph insertion, selected-range bold, native HWP/HWPX export/reopen, original/table text preservation and persisted reopen. Physical Android IME/sharing/OS termination and actual Hangul compatibility remain unverified. Pending bold set before a Korean composition did not survive on the first run; selected-range bold succeeds. That pending-format/IME behavior is not claimed fixed. Rich binary AI/Drive integration is still pending; details are in `docs/plans/mobile-hwp.md`.

@@ -1,0 +1,32 @@
+import type zh from './zh'
+export default {
+  driveCancelPending: 'إلغاء الإنشاء المعلق (الاحتفاظ بملفات Drive)',
+  driveLiveMode: 'مستندات Google قابلة للتحرير',
+  driveBackupMode: 'نسخ الملفات الاحتياطية السابقة',
+  driveLiveNotice:
+    'زامن مستندات Google النصية دون كمبيوتر. استخدم Google Drive في ChatGPT لتحرير المستند نفسه. لا تُحرر هنا الجداول أو المستندات المنسقة أو متعددة علامات التبويب.',
+  driveGoogleLink: 'فتح مستند Google',
+  driveLiveConflict: 'تغيرت النسختان. تم حفظ المسودة. افتح نسخة Drive بشكل منفصل.',
+  driveUnsupported: 'محتوى أو تنسيق غير مدعوم. تم حفظ الأصل والمسودة المحلية.',
+  driveUncertain: 'نتيجة Google غير مؤكدة. أعد المزامنة للعثور على الملف نفسه ولا تنشئ نسخة أخرى.',
+  driveSetupHint:
+    'فعّل Drive API وDocs API في Google Cloud. سجّل حزمة Android وشهادة التوقيع أو عميل OAuth للويب لهذا المصدر. لا حاجة لسر العميل.',
+  driveWebClientId: 'معرّف عميل OAuth للويب (عام)',
+  driveSaveSetup: 'حفظ إعداد الدخول',
+  driveConnect: 'ربط Drive',
+  driveDisconnect: 'فصل Drive',
+  driveSync: 'مزامنة هذا المستند',
+  driveRefresh: 'تحديث',
+  driveRemoteFiles: 'إصدارات Drive',
+  driveConnected: 'تم ربط Drive',
+  driveDisconnected: 'Drive غير متصل',
+  driveBusy: 'جارٍ المزامنة…',
+  driveSynced: 'اكتملت المزامنة',
+  driveConflict: 'توجد إصدارات متعددة. افتح كل فرع من قائمة Drive.',
+  driveFailed: 'فشلت عملية Drive. تم الاحتفاظ بالمستندات المحلية.',
+  driveSetup: 'اضبط Google OAuth أولاً. راجع دليل الإعداد.',
+  driveAccountMismatch: 'هذا المستند مرتبط بحساب Drive آخر. اربط ذلك الحساب.',
+  drivePending: 'الرفع في قائمة الانتظار على هذا الجهاز',
+  driveOffline: 'غير متصل. ستُعاد مزامنة المستندات المرتبطة عند الاتصال.',
+  driveNotice: 'يحفظ Drive التعديلات كملفات جديدة. الذكاء الاصطناعي السحابي غير متصل.',
+} satisfies Record<keyof typeof zh, string>
