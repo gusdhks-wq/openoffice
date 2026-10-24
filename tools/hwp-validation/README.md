@@ -170,3 +170,20 @@ node --import tsx tools/hwp-validation/preservation.mts \
 HWP/HWPX의 새 탭에 폭을 쓴 뒤 텍스트와 지정 폭을 엔진에서 다시 읽는지 확인한다.
 폭 6000 HWPUNIT는 합성 시험값이다. 제품에서는 기존 `measureTabs` 경로의 실제 화면 측정값이 필요하다.
 추가된 합성 저장 상태 시험에서는 메모의 연결 대상 유지/삭제, 수식 캡션 식별, 필드 종류 복원/다른 식별자 거부도 검사한다. 이 다섯 사례는 실제 엔진에서 새 손실을 재현한 시험과 구분한다. 암호·변경 추적과 모바일 저장 연결은 여전히 별도 검증이 필요하다.
+
+## 저장 보호 조건과 실패 경로
+
+```sh
+node --import tsx tools/hwp-validation/save-guards.mts \
+  --out /private/save-guards --runtime-root /built/checkout
+```
+
+실제 PC `runSave`를 실행하되 editor/IPC port는 시험용이다. 암호 상태, 메인에서 거부한 변경 추적,
+재열기 검증 실패, 쪽수 변화, export 예외, 취소, commit 실패, 외부 변경 충돌 등을 검사한다.
+실제 암호 문서·메인 IPC·백업 디스크 오류·Android를 시험한 것으로 판정하지 않는다.
+`KNOWN_RISK`는 현재의 비엄격 동작이 재현됐음을 뜻하며 저장 허용 판정이 아니다.
+보고서의 `nativeExportReleaseEligible`은 false다. 종료 코드 0은 이 시험의 기대 동작 확인일 뿐이다.
+
+현재 확인된 위험은 (1) 탭 측정 실패 때 측정 없이 저장, (2) 바탕쪽/메모 보존 실패를
+`tailsLost`로 알리면서 저장 성공을 반환하는 동작이다. PC의 기존 정책은 수정하지 않았다.
+모바일 제품 담당이 서식 보존 저장의 실패·경고 정책을 정한 뒤 별도 수용 시험을 연결해야 한다.
