@@ -149,3 +149,24 @@ node tools/hwp-validation/verify-mobile-adapter.mjs \
 결정적 재생, 중복 operation ID 거부, 오래된 대상 거부, 실패 후 이전 작업 읽기,
 줄바꿈/빈 대상/모호한 대상 거부다. 미래 원격 명령의 base revision/hash·작업 영수증이나
 브라우저 동시 탭 저장 충돌은 이 스크립트의 검사 범위가 아니다.
+
+## 수정본 저장 전 보존 재현
+
+`preservation.mts`는 합성 문서에서 생 엔진 export의 바탕쪽 누락과 새 탭 폭 누락을 재현하고,
+**수정하지 않은 기존 PC 보존 함수**를 적용해 재검증한다. 새 바이트 보정이나 모바일 저장 구현은 추가하지 않는다.
+
+```sh
+node --import tsx tools/hwp-validation/preservation.mts \
+  --out /private/preservation --runtime-root /built/checkout
+```
+
+`tsx`와 `cfb`가 설치된 기존 작업 환경을 사용한다. 별도 checkout에서 실행하면 `--import`에
+해당 환경의 `node_modules/tsx/dist/loader.mjs` 절대 경로를 지정할 수 있다. tsx CLI의 IPC가
+제한된 샌드박스에서는 위 Node loader 경로를 사용한다.
+
+`reproductionAndExistingHelper: PASS`는 **손실을 재현했고 기존 보존 처리가 통과했다**는 뜻이다.
+`rawExportSafe: false`를 모바일 저장 허용으로 바꾸어 해석하지 않는다.
+시험은 HWP 바탕쪽 1개가 편집 후 0개가 되고 보존 후 1개로 복구되는지,
+HWP/HWPX의 새 탭에 폭을 쓴 뒤 텍스트와 지정 폭을 엔진에서 다시 읽는지 확인한다.
+폭 6000 HWPUNIT는 합성 시험값이다. 제품에서는 기존 `measureTabs` 경로의 실제 화면 측정값이 필요하다.
+메모·필드·캡션·암호·변경 추적은 이 작은 재현기의 검사 범위가 아니며 기존 PC 시험과 별도로 연결해야 한다.
