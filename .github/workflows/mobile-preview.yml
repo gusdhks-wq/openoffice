@@ -1,6 +1,16 @@
 name: Mobile preview packages
 
 on:
+  push:
+    branches: [feat/mobile-offline-prototype]
+    paths:
+      - .github/workflows/mobile-preview.yml
+      - apps/mobile/**
+      - apps/hwp/**
+      - vendor/rhwp-core/**
+      - packages/cloud-documents/**
+      - package.json
+      - package-lock.json
   pull_request:
     branches: [main]
     paths:
