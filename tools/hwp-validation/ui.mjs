@@ -57,6 +57,7 @@ const copy = join(out, `editable-copy${format}`)
 if (existsSync(copy))
   throw Error('Use a fresh output directory; refusing to replace a previous run')
 copyFileSync(source, copy)
+const initialSourceHash = createHash('sha256').update(readFileSync(source)).digest('hex')
 const profile = join(out, 'profile')
 mkdirSync(profile)
 writeFileSync(join(profile, 'app-settings.json'), JSON.stringify({ onboardingSeen: true }))
@@ -134,55 +135,77 @@ try {
     item,
   )
   result.checks.editAppliedOnce = changed.ok === true && changed.count === 1
+  if (args.includes('--backup-failure')) mkdirSync(copy + '.bak')
   await app.evaluate(({ webContents }) => {
     for (const w of webContents.getAllWebContents())
       if (w.getURL().includes('://hwp/')) w.send('hwp:save-request', 'save')
   })
-  // A backup appears before the write: also require the copy's hash to change.
-  const digest = (p) => createHash('sha256').update(readFileSync(p)).digest('hex')
-  const originalHash = digest(source)
-  for (let i = 0; i < 90 && (!existsSync(copy + '.bak') || digest(copy) === originalHash); i++)
-    await page.waitForTimeout(500)
-  result.checks.backupMatchesOriginal =
-    existsSync(copy + '.bak') && digest(copy + '.bak') === originalHash
-  result.checks.savedBytesChanged = digest(copy) !== originalHash
-  result.checks.sourceUnchanged = digest(source) === originalHash
-  // Reopen the actual app-saved bytes through the pinned engine, not the live editor.
-  const { default: init, HwpDocument } = await import(
-    pathToFileURL(join(runtime, 'vendor/rhwp-core/rhwp.js'))
-  )
-  const { agentPlugin } = await import(
-    pathToFileURL(join(runtime, 'apps/hwp/studio-plugin/agent-plugin.mjs'))
-  )
-  await init({ module_or_path: readFileSync(join(runtime, 'vendor/rhwp-core/rhwp_bg.wasm')) })
-  const d = new HwpDocument(readFileSync(copy))
-  const p = agentPlugin.activate({
-    read: (fn) => fn(d),
-    transaction: (_, fn) => fn({ doc: () => d, deferPagination: () => {} }),
-    events: { on: () => () => {} },
-    automation: { execute: () => null },
-  })
-  result.checks.savedTextEqualsExpected = p.readText() === before.replace(item.find, item.replace)
-  await page.screenshot({ path: join(out, 'after.png') })
-  const pdf = join(out, 'edited.pdf')
-  await app.evaluate(({ dialog }, path) => {
-    dialog.showSaveDialog = async () => ({ canceled: false, filePath: path })
-  }, pdf)
-  await app.evaluate(({ webContents }) => {
-    for (const w of webContents.getAllWebContents())
-      if (w.getURL().includes('://hwp/')) w.send('hwp:print-request', 'pdf')
-  })
-  for (let i = 0; i < 120 && !existsSync(pdf); i++) await page.waitForTimeout(500)
-  result.checks.pdfSignature =
-    existsSync(pdf) && readFileSync(pdf).subarray(0, 5).toString() === '%PDF-'
-  result.warnings = [
-    'PDF signature is not a render/text check; inspect with an independent PDF reader',
-    'Screenshots can include edit highlights; compare PDF separately',
-  ]
+  if (args.includes('--backup-failure')) {
+    await page.waitForFunction(
+      () => document.body.innerText.includes('EISDIR'),
+      {},
+      { timeout: 30000 },
+    )
+    result.scenario = 'actual-backup-path-is-directory; expected save refusal'
+    result.checks.saveErrorVisible = true
+    result.checks.copyUnchanged =
+      createHash('sha256').update(readFileSync(copy)).digest('hex') === initialSourceHash
+    result.checks.sourceUnchanged =
+      createHash('sha256').update(readFileSync(source)).digest('hex') === initialSourceHash
+    const live = await page.evaluate(async () =>
+      window.__trialEditor.plugins.invoke('ieum-agent', 'readText', []),
+    )
+    result.checks.unsavedEditRetained = live === before.replace(item.find, item.replace)
+    await page.screenshot({ path: join(out, 'backup-failure.png') })
+  } else {
+    // A backup appears before the write: also require the copy's hash to change.
+    const digest = (p) => createHash('sha256').update(readFileSync(p)).digest('hex')
+    const originalHash = digest(source)
+    for (let i = 0; i < 90 && (!existsSync(copy + '.bak') || digest(copy) === originalHash); i++)
+      await page.waitForTimeout(500)
+    result.checks.backupMatchesOriginal =
+      existsSync(copy + '.bak') && digest(copy + '.bak') === originalHash
+    result.checks.savedBytesChanged = digest(copy) !== originalHash
+    result.checks.sourceUnchanged = digest(source) === originalHash
+    // Reopen the actual app-saved bytes through the pinned engine, not the live editor.
+    const { default: init, HwpDocument } = await import(
+      pathToFileURL(join(runtime, 'vendor/rhwp-core/rhwp.js'))
+    )
+    const { agentPlugin } = await import(
+      pathToFileURL(join(runtime, 'apps/hwp/studio-plugin/agent-plugin.mjs'))
+    )
+    await init({ module_or_path: readFileSync(join(runtime, 'vendor/rhwp-core/rhwp_bg.wasm')) })
+    const d = new HwpDocument(readFileSync(copy))
+    const p = agentPlugin.activate({
+      read: (fn) => fn(d),
+      transaction: (_, fn) => fn({ doc: () => d, deferPagination: () => {} }),
+      events: { on: () => () => {} },
+      automation: { execute: () => null },
+    })
+    result.checks.savedTextEqualsExpected = p.readText() === before.replace(item.find, item.replace)
+    await page.screenshot({ path: join(out, 'after.png') })
+    const pdf = join(out, 'edited.pdf')
+    await app.evaluate(({ dialog }, path) => {
+      dialog.showSaveDialog = async () => ({ canceled: false, filePath: path })
+    }, pdf)
+    await app.evaluate(({ webContents }) => {
+      for (const w of webContents.getAllWebContents())
+        if (w.getURL().includes('://hwp/')) w.send('hwp:print-request', 'pdf')
+    })
+    for (let i = 0; i < 120 && !existsSync(pdf); i++) await page.waitForTimeout(500)
+    result.checks.pdfSignature =
+      existsSync(pdf) && readFileSync(pdf).subarray(0, 5).toString() === '%PDF-'
+    result.warnings = [
+      'PDF signature is not a render/text check; inspect with an independent PDF reader',
+      'Screenshots can include edit highlights; compare PDF separately',
+    ]
+  }
 } catch {
   result.error = 'UI_TEST_FAILED' // Never echo document text or arbitrary engine errors.
 } finally {
-  await app.close()
+  if (args.includes('--backup-failure'))
+    await app.evaluate(({ app }) => app.exit(0)).catch(() => {})
+  else await app.close()
   result.status =
     result.error || Object.values(result.checks).some((v) => v !== true) ? 'FAIL' : 'PASS'
   writeFileSync(join(out, 'ui-report.json'), JSON.stringify(result, null, 2) + '\n')

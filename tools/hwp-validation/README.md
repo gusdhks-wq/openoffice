@@ -187,3 +187,34 @@ node --import tsx tools/hwp-validation/save-guards.mts \
 현재 확인된 위험은 (1) 탭 측정 실패 때 측정 없이 저장, (2) 바탕쪽/메모 보존 실패를
 `tailsLost`로 알리면서 저장 성공을 반환하는 동작이다. PC의 기존 정책은 수정하지 않았다.
 모바일 제품 담당이 서식 보존 저장의 실패·경고 정책을 정한 뒤 별도 수용 시험을 연결해야 한다.
+
+## 최신 모바일 수정본 저장 검증
+
+이전 `verify-mobile-adapter.mjs`는 d502456의 journal 방식에 대한 역사적 검증이다.
+8fcc050의 직접 편집·수정본 저장은 별도 `verify-native-save.mts`로 검사한다.
+검토한 커밋의 `engine.ts`, `workspace.ts`, `native-save.ts`를 저장소 밖 JSON의
+`engine`, `workspace`, `native` 키에 원문 그대로 넣는다. 세 원문의 SHA256을 고정해 검사한다.
+
+```sh
+node --import tsx tools/hwp-validation/verify-native-save.mts \
+  --source /private/native-source.json --manifest /private/cases.json \
+  --out /private/native-results --runtime-root /built/checkout
+```
+
+실제 모바일 exportNativeHwp 함수를 transpile해 실행하고, Node 실행용 import 위치만 바꾼다.
+virtual:mobile-hwp 모듈은 **PC 함수로 연결하므로 브라우저 Buffer/압축 어댑터 검증이 아니다**.
+editor port 역시 실제 WASM 문서를 감싼 시험용 port이며 rhwp-studio/Android UI 검증이 아니다.
+본문·전체 표 셀/병합·레이아웃·원본 해시, 암호 상태 미확인/보호 상태/변경 fence/verify 실패,
+양 형식의 탭 측정 누락 거절을 검사한다. `--artifacts`는 비공개 출력에만 수정본을 쓴다.
+
+실제 PC 백업 실패 시험은 UI runner의 선택적 모드다:
+
+```sh
+node tools/hwp-validation/ui.mjs --manifest /private/cases.json --case case-a \
+  --out /private/new-backup-failure-run --runtime-root /built/checkout --backup-failure
+```
+
+사본의 `.bak` 경로에 디렉터리를 만들어 실제 copyFile의 EISDIR을 유도한다. 오류 표시,
+원본·사본 해시 무변경, 화면의 미저장 편집 유지가 성공 기준이다. 이 시험 모드만 마지막에
+자체 시험 앱을 강제 종료해 미저장 확인창을 남기지 않는다. 사용자 문서나 다른 앱은 종료하지 않는다.
+이 결과는 모든 파일시스템 오류·원자적 쓰기·전원 중단 보장을 뜻하지 않는다.
