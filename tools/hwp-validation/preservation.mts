@@ -152,6 +152,168 @@ for (const format of ['hwp', 'hwpx']) {
     results.push({ case: `${format}-new-tab`, reproductionAndExistingHelper: 'FAIL' })
   }
 }
+// These fixtures model the saved record states from the existing PC regressions.
+// Unlike the first three cases, they do not claim a fresh engine-loss reproduction.
+const { fieldKindsOf, restoreFieldKinds } = await import(
+  pathToFileURL(join(runtime, 'apps/hwp/src/main/field-kinds.ts')).href
+)
+function exported(text: string) {
+  const d = HwpDocument.createEmpty()
+  d.createBlankDocument()
+  d.insertText(0, 0, 0, text)
+  const bytes = d.exportHwp()
+  d.free()
+  return bytes
+}
+function section(file: Uint8Array) {
+  const cfb = CFB.read(Buffer.from(file), { type: 'buffer' })
+  return inflateRawSync(Buffer.from(CFB.find(cfb, '/BodyText/Section0').content))
+}
+function append(file: Uint8Array, ...records: Buffer[]) {
+  const cfb = CFB.read(Buffer.from(file), { type: 'buffer' })
+  CFB.utils.cfb_add(
+    cfb,
+    '/BodyText/Section0',
+    deflateRawSync(Buffer.concat([section(file), ...records])),
+  )
+  return new Uint8Array(CFB.write(cfb, { type: 'buffer' }))
+}
+function paragraph(level: number) {
+  const h = Buffer.alloc(24)
+  h.writeUInt32LE(0x80000001)
+  h.writeUInt16LE(1, 12)
+  h.writeUInt16LE(1, 16)
+  const line = Buffer.alloc(36)
+  line.writeUInt32LE(1000, 8)
+  line.writeUInt32LE(1000, 12)
+  line.writeUInt32LE(850, 16)
+  return Buffer.concat([
+    record(66, level, h),
+    record(68, level + 1, Buffer.alloc(8)),
+    record(69, level + 1, line),
+  ])
+}
+function memo(number: number) {
+  const id = Buffer.alloc(4)
+  id.writeUInt32LE(number)
+  const list = Buffer.alloc(16)
+  list.writeUInt32LE(1)
+  return Buffer.concat([record(93, 1, id), record(72, 1, list), paragraph(1)])
+}
+function fieldChar(code: number, kind: string) {
+  const c = Buffer.alloc(16)
+  c.writeUInt16LE(code)
+  c.write(kind, 2, 'latin1')
+  c.writeUInt16LE(code, 14)
+  return c
+}
+function field(kind: string, id: string) {
+  const text = Buffer.concat([
+    fieldChar(3, kind),
+    Buffer.from('X', 'utf16le'),
+    fieldChar(4, 'em%\0'),
+    Buffer.from('\r', 'utf16le'),
+  ])
+  const h = Buffer.alloc(24)
+  h.writeUInt32LE(text.length / 2)
+  const c = Buffer.concat([
+    Buffer.from('knu%', 'latin1'),
+    Buffer.alloc(5),
+    Buffer.from(id, 'utf16le'),
+  ])
+  return Buffer.concat([record(66, 0, h), record(67, 1, text), record(71, 1, c)])
+}
+function equation(id: number, caption: boolean) {
+  const text = Buffer.alloc(18)
+  text.writeUInt16LE(11)
+  text.write('deqe', 2, 'latin1')
+  text.writeUInt16LE(11, 14)
+  text.writeUInt16LE(13, 16)
+  const h = Buffer.alloc(24)
+  h.writeUInt32LE(9)
+  const c = Buffer.alloc(46)
+  c.write('deqe', 0, 'latin1')
+  c.writeUInt32LE(id, 36)
+  const list = Buffer.alloc(30)
+  list.writeUInt32LE(1)
+  return Buffer.concat([
+    record(66, 0, h),
+    record(67, 1, text),
+    record(71, 1, c),
+    ...(caption ? [record(72, 2, list), paragraph(2)] : []),
+    record(88, 2, Buffer.concat([Buffer.alloc(4), Buffer.from('x^2', 'utf16le')])),
+  ])
+}
+function fixtureCase(name: string, run: () => void) {
+  try {
+    run()
+    results.push({
+      case: name,
+      evidence: 'synthetic-saved-state-fixture',
+      reproductionAndExistingHelper: 'PASS',
+    })
+  } catch {
+    results.push({
+      case: name,
+      evidence: 'synthetic-saved-state-fixture',
+      reproductionAndExistingHelper: 'FAIL',
+    })
+  }
+}
+fixtureCase('hwp-memo-retained-anchor', () => {
+  const original = append(exported('Body MEMO/65535/3/1769959632/2'), memo(3))
+  const saved = exported('Changed body MEMO/65535/3/1769959632/2')
+  const kept = sectionTailsOf(original)
+  assert.ok(kept)
+  const r = restoreSectionTails(saved, kept)
+  assert.equal(r.restored, 1)
+  assert.equal(r.skipped, undefined)
+  assert.deepEqual(section(r.bytes), Buffer.concat([section(saved), memo(3)]))
+})
+fixtureCase('hwp-memo-deleted-or-different-anchor', () => {
+  const original = append(exported('Body MEMO/65535/3/1769959632/2'), memo(3))
+  const kept = sectionTailsOf(original)
+  assert.ok(kept)
+  for (const text of ['Body without anchor', 'Body MEMO/65535/13/1/2']) {
+    const saved = exported(text)
+    const r = restoreSectionTails(saved, kept)
+    assert.equal(r.restored, 0)
+    assert.deepEqual(Buffer.from(r.bytes), Buffer.from(saved))
+  }
+})
+fixtureCase('hwp-equation-caption-identity', () => {
+  const base = exported('Equation fixture')
+  const opened = append(base, equation(7, false), equation(8, true))
+  const saved = append(base, equation(7, false), equation(8, false))
+  const kept = sectionTailsOf(opened)
+  assert.equal(kept.captions.size, 1)
+  const r = restoreSectionTails(saved, kept)
+  assert.equal(r.restored, 1)
+  assert.deepEqual(section(r.bytes), section(opened))
+  const other = append(base, equation(9, false))
+  const rejected = restoreSectionTails(other, kept)
+  assert.equal(rejected.restored, 0)
+  assert.deepEqual(Buffer.from(rejected.bytes), Buffer.from(other))
+})
+fixtureCase('hwp-field-kind-only', () => {
+  const base = exported('Field fixture')
+  const original = append(base, field('em%%', 'MEMO/1/1/'))
+  const saved = append(base, field('knu%', 'MEMO/1/1/'))
+  const kept = fieldKindsOf(original)
+  assert.equal(kept.size, 1)
+  const r = restoreFieldKinds(saved, kept)
+  assert.equal(r.restored, 1)
+  assert.deepEqual(section(r.bytes), section(original))
+})
+fixtureCase('hwp-field-wrong-identity-unchanged', () => {
+  const base = exported('Field identity fixture')
+  const original = append(base, field('em%%', 'MEMO/1/1/'))
+  const other = append(base, field('knu%', 'MEMO/1/2/'))
+  const r = restoreFieldKinds(other, fieldKindsOf(original))
+  assert.equal(r.restored, 0)
+  assert.deepEqual(Buffer.from(r.bytes), Buffer.from(other))
+})
+
 writeFileSync(
   join(out, 'preservation-report.json'),
   JSON.stringify(
