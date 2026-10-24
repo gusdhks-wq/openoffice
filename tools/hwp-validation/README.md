@@ -126,3 +126,26 @@ hwp5txt /private/roundtrip-results/case-a/edited.hwp > /private/independent.txt
 ```sh
 node --test tools/hwp-validation/layout.test.mjs
 ```
+
+## 모바일 어댑터 계약 검증
+
+모바일 PR #1의 `d5024560505a088b4f651a2d287f052b73374900`을 별도로 검토했다.
+`verify-mobile-adapter.mjs`는 해당 커밋의 실제 `engine.ts`, `workspace.ts` 함수를
+Node에서 실행한다. 어댑터를 새로 구현한 모형 시험이 아니다. 단, 브라우저/IndexedDB/Android 시험도 아니다.
+
+해당 커밋의 `apps/mobile/src/renderer/hwp/engine.ts`와 `workspace.ts` 원문을 읽어
+저장소 밖 JSON에 `{"engine":"...원문...","workspace":"...원문..."}` 형태로 넣는다.
+원본 코드는 이 검증 브랜치에 복사해 커밋하지 않는다. 원문 SHA256을 검사하므로 모바일 담당이
+코드를 바꾸면 먼저 검토하고 기준 해시와 커밋을 갱신해야 한다.
+
+```sh
+node tools/hwp-validation/verify-mobile-adapter.mjs \
+  --source /private/mobile-source.json --out /private/mobile-report \
+  --runtime-root /built/checkout
+```
+
+런타임에 `typescript`가 필요하다. 함수 코드를 transpile하고 Node용 import 위치만 바꿔 실행한다.
+검사 항목은 양 형식의 본문/표 교체 재생, journal 기반 undo, 원본 불변/독립 사본,
+결정적 재생, 중복 operation ID 거부, 오래된 대상 거부, 실패 후 이전 작업 읽기,
+줄바꿈/빈 대상/모호한 대상 거부다. 미래 원격 명령의 base revision/hash·작업 영수증이나
+브라우저 동시 탭 저장 충돌은 이 스크립트의 검사 범위가 아니다.
