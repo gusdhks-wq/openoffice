@@ -218,3 +218,33 @@ node tools/hwp-validation/ui.mjs --manifest /private/cases.json --case case-a \
 원본·사본 해시 무변경, 화면의 미저장 편집 유지가 성공 기준이다. 이 시험 모드만 마지막에
 자체 시험 앱을 강제 종료해 미저장 확인창을 남기지 않는다. 사용자 문서나 다른 앱은 종료하지 않는다.
 이 결과는 모든 파일시스템 오류·원자적 쓰기·전원 중단 보장을 뜻하지 않는다.
+
+## 실제 브라우저 보존 어댑터 대조
+
+`browser-preservation.mts`는 검토한 8fcc050의 실제 `hwp-browser.ts` Vite 플러그인의 load를 호출해
+PC 보존 함수에 모바일 Buffer/압축/해시/CFB를 연결하고, browser 대상으로 번들한다.
+Node 없는 sandboxed Electron Chromium renderer에서 실행한다. Android WebView와 전체 편집 UI 시험은 아니다.
+
+준비는 저장소 밖의 별도 stage에서 한다. 해당 커밋의 다음 공개 소스 원문을 같은 상대 경로로 준비한다:
+`apps/mobile/scripts/hwp-browser.ts`, `apps/mobile/src/renderer/hwp/browser/{crypto,zlib,cfb}.ts`.
+`stage/apps/hwp`는 고정된 PC 소스가 있는 checkout의 apps/hwp를 가리켜야 한다.
+시험 stage에만 `buffer@6.0.3`, `pako@2.1.0`, `crc-32@1.2.2`, `cfb@1.2.2`, `@noble/hashes@2.2.0`을
+설치한다. 기존 작업 환경에는 esbuild, playwright-core, Electron, tsx 및 Linux 화면이 필요하다.
+원문 해시를 고정하므로 새 모바일 커밋은 검토 후 기준을 갱신한다.
+
+```sh
+node --import tsx tools/hwp-validation/preservation.mts \
+  --out /private/fixtures --runtime-root /built/checkout --browser-fixtures
+node --import tsx tools/hwp-validation/browser-preservation.mts \
+  --stage /private/mobile-stage --fixtures /private/fixtures/browser-fixtures.json \
+  --out /private/browser-results --runtime-root /built/checkout
+```
+
+`--browser-fixtures`는 원문과 기대 저장본이 담긴 합성 입력을 비공개 출력에만 쓴다.
+기대 결과는 Node PC 함수가 만든 컨테이너의 압축 해제 스트림과 비교한다. ZIP 내용은 CFB가 이미
+압축 해제하므로 다시 inflate하지 않는다. Node 전역 부재와 HTTP 요청 0개도 확인한다.
+
+현재 고정 upstream 어댑터는 잘린 DEFLATE 거절 검사에서 **실패하므로 종료 코드 1이 정상 재현**이다.
+단순히 모든 시험이 통과했다고 처리하지 않는다. 검토한 별도 수정 후보 stage는 `--candidate`로 실행하며
+해시 고정을 건너뛰는 대신 결과에 private candidate임과 실제 해시를 기록한다. 이를 upstream 구현으로
+주장하지 않는다. 검토되지 않은 임의 소스에 사용하지 않는다.

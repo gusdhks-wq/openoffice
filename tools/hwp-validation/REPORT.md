@@ -167,3 +167,26 @@ copyFile EISDIR을 유도한다. 최초 실행에서는 오류·사본 무변경
 재실행하며 제품 저장/종료 코드는 바꾸지 않았다.
 
 백업 실패 주입 재실행 결과: 실제 앱의 EISDIR 오류 표시, 원본 해시 무변경, 작업 사본 해시 무변경, 화면의 미저장 수정 유지가 모두 true로 PASS였다. 이는 PC 실제 파일시스템 시험이며 모바일 공유/기기 파일 저장 실패는 미검증이다.
+
+## 브라우저 보존 어댑터 대조 및 압축 종료 검증
+
+8fcc050의 실제 Vite 플러그인과 브라우저 Buffer/pako/CFB/SHA-1/CRC를 사용해 sandboxed Electron
+Chromium renderer에서 검사했다. Node globals 없음, HTTP 요청 0개를 확인했다. 의존성은 별도
+비공개 시험 stage에만 설치했고 제품 package/lock 파일은 수정하지 않았다.
+
+정상 보존 10개 입력(메모의 두 거부 입력과 캡션 거부 입력을 따로 집계)은 모두 Node PC의 기대
+컨테이너 스트림과 일치했다. 초기 HWPX 미리보기 차이는 시험기가 이미 ZIP 해제한 미리보기 텍스트를
+재차 inflate한 문제였으므로 비교기를 수정했다. 압축/CFB 인코딩 바이트 자체가 아닌 내부 스트림을 비교한다.
+
+실제 어댑터 오류: raw DEFLATE 입력 [0x03]은 종료되지 않은 스트림이다. Node는 Z_BUF_ERROR로
+거절하지만 현재 browser/zlib.ts는 inflater.err만 확인해 오류가 0인 미완료 상태를 빈 Buffer로 반환한다.
+정상 빈 스트림 [0x03,0x00]과 구별해야 한다. 같은 오류를 브라우저에서 재현했다.
+
+- 검토한 upstream 원문: 15개 중 14개 PASS, incomplete-deflate-rejected FAIL. 종료 코드 1.
+- 비공개 stage의 수정 후보(err 또는 !ended 검사): 15개 모두 PASS. 정상 빈 스트림/잘못된 스트림,
+  기존 정상 보존, SHA1/CRC 검사를 함께 확인했다. 제품 파일에는 적용하지 않았다.
+- 후보 검증은 모바일 upstream 수정 완료나 Android WebView 검증을 뜻하지 않는다. 실제 파일 소유자인
+  모바일 담당에게 오류·원인·후보 검증을 PR #1로 전달하고 반영을 요청했다.
+
+새 시험 코드는 tools/hwp-validation만 변경했다. 원본 문서, 생성 문서, 브라우저 번들·fixture·화면은
+공개하지 않는다. 브라우저 압축의 해제 예산 자체 및 실제 기기 저장은 별도 미검증 항목이다.

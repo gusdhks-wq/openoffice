@@ -41,6 +41,24 @@ const { newTabsOf, writeTabWidths } = await import(
   pathToFileURL(join(runtime, 'apps/hwp/src/main/tab-widths.ts')).href
 )
 const results: any[] = []
+const browserCases: any[] = []
+function browserCase(
+  id: string,
+  method: string,
+  original: Uint8Array,
+  saved: Uint8Array,
+  expected: Uint8Array,
+  measures: any[] = [],
+) {
+  browserCases.push({
+    id,
+    method,
+    original: Buffer.from(original).toString('base64'),
+    saved: Buffer.from(saved).toString('base64'),
+    expected: Buffer.from(expected).toString('base64'),
+    measures,
+  })
+}
 function record(tag: number, level: number, payload: Buffer) {
   const header = Buffer.alloc(4)
   header.writeUInt32LE((tag | (level << 10) | (payload.length << 20)) >>> 0)
@@ -102,6 +120,7 @@ try {
   assert.equal(repairedCount, 1)
   assert.equal(repaired.skipped, undefined)
   assert.equal(repaired.restored, 1)
+  browserCase('master-page', 'tails', opened, raw, repaired.bytes)
   const reopened = new HwpDocument(repaired.bytes)
   assert.equal(reopened.pageCount(), pages)
   assert.ok(reopened.getTextRange(0, 0, 0, reopened.getParagraphLength(0, 0)).startsWith('Edited '))
@@ -129,6 +148,7 @@ for (const format of ['hwp', 'hwpx']) {
     const measured = spots.map((spot: any) => ({ ...spot, width: 6000, type: 0, fill: 3 }))
     const result = writeTabWidths(raw, format, measured)
     assert.equal(result.written, 1)
+    browserCase(format + '-tab', format + '-tabs', raw, raw, result.bytes, measured)
     assert.equal(newTabsOf(result.bytes, format).length, 0)
     const back = new HwpDocument(result.bytes)
     assert.equal(
@@ -269,6 +289,7 @@ fixtureCase('hwp-memo-retained-anchor', () => {
   assert.equal(r.restored, 1)
   assert.equal(r.skipped, undefined)
   assert.deepEqual(section(r.bytes), Buffer.concat([section(saved), memo(3)]))
+  browserCase('memo-retained', 'tails', original, saved, r.bytes)
 })
 fixtureCase('hwp-memo-deleted-or-different-anchor', () => {
   const original = append(exported('Body MEMO/65535/3/1769959632/2'), memo(3))
@@ -279,6 +300,7 @@ fixtureCase('hwp-memo-deleted-or-different-anchor', () => {
     const r = restoreSectionTails(saved, kept)
     assert.equal(r.restored, 0)
     assert.deepEqual(Buffer.from(r.bytes), Buffer.from(saved))
+    browserCase('memo-rejected-' + browserCases.length, 'tails', original, saved, r.bytes)
   }
 })
 fixtureCase('hwp-equation-caption-identity', () => {
@@ -290,10 +312,12 @@ fixtureCase('hwp-equation-caption-identity', () => {
   const r = restoreSectionTails(saved, kept)
   assert.equal(r.restored, 1)
   assert.deepEqual(section(r.bytes), section(opened))
+  browserCase('equation-caption', 'tails', opened, saved, r.bytes)
   const other = append(base, equation(9, false))
   const rejected = restoreSectionTails(other, kept)
   assert.equal(rejected.restored, 0)
   assert.deepEqual(Buffer.from(rejected.bytes), Buffer.from(other))
+  browserCase('caption-rejected', 'tails', opened, other, rejected.bytes)
 })
 fixtureCase('hwp-field-kind-only', () => {
   const base = exported('Field fixture')
@@ -304,6 +328,7 @@ fixtureCase('hwp-field-kind-only', () => {
   const r = restoreFieldKinds(saved, kept)
   assert.equal(r.restored, 1)
   assert.deepEqual(section(r.bytes), section(original))
+  browserCase('field-restored', 'fields', original, saved, r.bytes)
 })
 fixtureCase('hwp-field-wrong-identity-unchanged', () => {
   const base = exported('Field identity fixture')
@@ -312,6 +337,7 @@ fixtureCase('hwp-field-wrong-identity-unchanged', () => {
   const r = restoreFieldKinds(other, fieldKindsOf(original))
   assert.equal(r.restored, 0)
   assert.deepEqual(Buffer.from(r.bytes), Buffer.from(other))
+  browserCase('field-rejected', 'fields', original, other, r.bytes)
 })
 
 writeFileSync(
@@ -327,6 +353,8 @@ writeFileSync(
     2,
   ) + '\n',
 )
+if (args.includes('--browser-fixtures'))
+  writeFileSync(join(out, 'browser-fixtures.json'), JSON.stringify(browserCases))
 for (const r of results)
   console.log(`${r.case}: ${r.reproductionAndExistingHelper}; raw export is not certified`)
 process.exitCode = results.some((r) => r.reproductionAndExistingHelper === 'FAIL') ? 1 : 0
